@@ -16,6 +16,5 @@ public class MainActivity extends AppCompatActivity {
 
     //something from branch funcionalidade2
 
-    //this branch is inside on development branch
 
 }
