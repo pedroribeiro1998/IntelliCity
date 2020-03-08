@@ -14,8 +14,7 @@ public class MainActivity extends AppCompatActivity {
 
     //change something
 
-    //something from branch funcionalidade1
+    //something from branch development
 
-    //something from branch funcionalidade1 commit 1
 
 }
