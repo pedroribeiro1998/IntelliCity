@@ -1,0 +1,2 @@
+rootProject.name='IntelliCity'
+include ':app'
