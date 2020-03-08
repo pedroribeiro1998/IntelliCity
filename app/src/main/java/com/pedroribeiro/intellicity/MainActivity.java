@@ -14,9 +14,7 @@ public class MainActivity extends AppCompatActivity {
 
     //change something
 
-    //this is the branch development
-
-    //now I'm gonna merge the funcionalidade3 branch to dev branch
+    //this is the branch funcionalidade 4
 
 
 }
