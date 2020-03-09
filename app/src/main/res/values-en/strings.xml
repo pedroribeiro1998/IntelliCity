@@ -11,4 +11,5 @@
     <string name="guardar">Guardar</string>
     <string name="limpar">Limpar</string>
     <string name="titulo_segunda_atividade">"Second Activity "</string>
+    <string name="botao2">botao2</string>
 </resources>

@@ -2,6 +2,7 @@ package com.pedroribeiro.intellicity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -68,5 +69,6 @@ public class MainActivity extends AppCompatActivity {
         textodescricao.setText("");
         textodata.setText("");
         textolocalizacao.setText("");
-}
+    }
+
 }

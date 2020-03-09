@@ -89,12 +89,5 @@
             android:text="@string/guardar"
             android:onClick="guardar"/>
 
-        <Button
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/limpar"
-            android:onClick="limpar"/>
-
     </LinearLayout>
 </RelativeLayout>
