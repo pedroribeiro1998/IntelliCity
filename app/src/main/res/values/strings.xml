@@ -1,3 +1,15 @@
 <resources>
-    <string name="app_name">IntelliCity</string>
+    <string name="app_name">Cidade Inteligente</string>
+    <string name="bemvindo">Bem vindo à Aplicação</string>
+    <string name="bemvindo2">MSG Classe Java</string>
+    <string name="nome">nome</string>
+    <string name="inserir_nota">inserir nova nota</string>
+    <string name="titulo">titulo</string>
+    <string name="descricao">descricao</string>
+    <string name="data">data</string>
+    <string name="localizacao">localizacao</string>
+    <string name="limpar">Limpar</string>
+    <string name="guardar">Guardar</string>
+    <string name="titulo_segunda_atividade">Segunda Atividade</string>
+
 </resources>

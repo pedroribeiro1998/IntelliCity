@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Ville intelligente</string>
+    <string name="bemvindo">Bienvenue dans l\'appli</string>
+    <string name="bemvindo2">Cours de français Java MSG</string>
+    <string name="nome">nom</string>
+    <string name="inserir_nota">inserir nova nota</string>
+    <string name="titulo">titulo</string>
+    <string name="descricao">descricao</string>
+    <string name="data">data</string>
+    <string name="localizacao">localizacao</string>
+    <string name="guardar">Guardar</string>
+    <string name="limpar">Limpar</string>
+    <string name="titulo_segunda_atividade">Segunda atividade frances</string>
+</resources>
