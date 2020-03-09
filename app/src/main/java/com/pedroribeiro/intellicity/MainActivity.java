@@ -71,4 +71,9 @@ public class MainActivity extends AppCompatActivity {
         textolocalizacao.setText("");
     }
 
+    public void botao2(View v){
+        Intent i = new Intent(MainActivity.this, Second.class);
+        startActivity(i);
+
+    }
 }
