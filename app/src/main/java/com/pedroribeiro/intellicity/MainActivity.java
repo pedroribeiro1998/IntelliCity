@@ -68,5 +68,5 @@ public class MainActivity extends AppCompatActivity {
         textodescricao.setText("");
         textodata.setText("");
         textolocalizacao.setText("");
-}
+    }
 }
