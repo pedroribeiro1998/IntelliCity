@@ -11,32 +11,23 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".Second">
 
-
-
-    <ListView
-        android:id="@+id/lista"
+    <TextView
+        android:id="@+id/titulo"
+        android:textStyle="bold"
+        android:textSize="20dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-    </ListView>
-
-    <LinearLayout
-        android:layout_alignParentBottom="true"
+    </TextView>
+    <TextView
+        android:id="@+id/descricao"
+        android:layout_below="@id/titulo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/button"
-            android:onClick="botao_xpto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/botao_xpto"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@id/lista"/>
-
-    </LinearLayout>
-
+        android:layout_height="match_parent">
+    </TextView>
+    <TextView
+        android:id="@+id/data"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+    </TextView>
 </RelativeLayout>
