@@ -11,7 +11,13 @@
     <string name="limpar">Limpar</string>
     <string name="guardar">Guardar</string>
     <string name="titulo_segunda_atividade">Segunda Atividade</string>
-    <string name="botao2">botao2</string>
+    <string name="botao2">Consultar</string>
     <string name="botao_xpto">Voltar</string>
+    <string name="opcao1">Opção1</string>
+    <string name="opcao2">Opção2</string>
+    <string name="opcao3">Opção3</string>
+    <string name="opcao4">Opção4</string>
+    <string name="editar">Editar</string>
+    <string name="remover">Remover</string>
 
 </resources>

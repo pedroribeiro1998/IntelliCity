@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/opcao1"
+        android:title="@string/opcao1"
+        android:icon="@drawable/icon1"
+        app:showAsAction="always" />
+
+    <item android:id="@+id/opcao2"
+        android:title="@string/opcao2"
+        android:icon="@drawable/icon3"
+        app:showAsAction="always" />
+
+    <item android:id="@+id/opcao3"
+        android:title="@string/opcao3"
+        android:icon="@drawable/icon2"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/opcao4"
+        android:title="@string/opcao4"
+        app:showAsAction="never"/>
+</menu>

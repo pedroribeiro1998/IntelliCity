@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -67,10 +70,25 @@ public class MainActivity extends AppCompatActivity {
             //TextView textodescricao = (TextView) findViewById(R.id.txtdescricao);
             //TextView textodata = (TextView) findViewById(R.id.txtdata);
             //TextView textolocalizacao = (TextView) findViewById(R.id.txtlocalizacao);
+            /*
             textotitulo.setText(titulo);
             textodescricao.setText(descricao);
             textodata.setText(data);
             textolocalizacao.setText(localizacao);
+            */
+
+
+            Intent i = new Intent(MainActivity.this, Second.class);
+            i.putExtra(Utils.PARAM_TITULO, edittitulo.getText().toString());
+            i.putExtra(Utils.PARAM_DESCRICAO, editdescricao.getText().toString());
+            i.putExtra(Utils.PARAM_DATA, editdata.getText().toString());
+            i.putExtra(Utils.PARAM_LOCALIZACAO, editlocalizacao.getText().toString());
+            startActivityForResult(i, REQUEST_CODE_OP_1);
+
+            edittitulo.setText("");
+            editdescricao.setText("");
+            editdata.setText("");
+            editlocalizacao.setText("");
         }
     }
 
@@ -98,12 +116,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void botao2(View v){
         Intent i = new Intent(MainActivity.this, Second.class);
+        /*
         i.putExtra(Utils.PARAM_TITULO, edittitulo.getText().toString());
         i.putExtra(Utils.PARAM_DESCRICAO, editdescricao.getText().toString());
         i.putExtra(Utils.PARAM_DATA, editdata.getText().toString());
         i.putExtra(Utils.PARAM_LOCALIZACAO, editlocalizacao.getText().toString());
-        //startActivity(i);
-        startActivityForResult(i, REQUEST_CODE_OP_1);
+        */
+        startActivity(i);
+        //startActivityForResult(i, REQUEST_CODE_OP_1);
     }
 
     @Override
@@ -119,5 +139,41 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+/* toolbar superior
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_ativ_1, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.opcao1:
+                Toast.makeText(MainActivity.this, "Opcao1", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.opcao2:
+                Toast.makeText(MainActivity.this, "Opcao2", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.opcao3:
+                Toast.makeText(MainActivity.this, "Opcao3", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.opcao4:
+                Toast.makeText(MainActivity.this, "Opcao4", Toast.LENGTH_SHORT).show();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+ */
 
 }
+
+
+
+
+
