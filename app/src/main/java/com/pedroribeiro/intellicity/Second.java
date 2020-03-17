@@ -2,21 +2,24 @@ package com.pedroribeiro.intellicity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.ContextMenu;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pedroribeiro.intellicity.adapters.CustomArrayAdapter;
+import com.pedroribeiro.intellicity.adapters.MyCursorAdapter;
+import com.pedroribeiro.intellicity.db.Contrato;
+import com.pedroribeiro.intellicity.db.DB;
 import com.pedroribeiro.intellicity.entities.Nota;
 import com.pedroribeiro.intellicity.utils.Utils;
 
@@ -33,13 +36,23 @@ public class Second extends AppCompatActivity {
 
     private int REQUEST_CODE_OP_1 = 1;
 
+    DB mDbHelper;
+    SQLiteDatabase db;
+    Cursor c, c_pessoas;
+    ListView lista;
+    //SimpleCursorAdapter adapter;
+    MyCursorAdapter madapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
 
+        mDbHelper = new DB(this);
+        db = mDbHelper.getReadableDatabase();
 
+        lista = (ListView) findViewById(R.id.lista);
+        preencheLista();
 
         //Toast.makeText(Second.this,titulo,Toast.LENGTH_SHORT).show();
         //Toast.makeText(Second.this,descricao,Toast.LENGTH_SHORT).show();
@@ -47,10 +60,27 @@ public class Second extends AppCompatActivity {
         //Toast.makeText(Second.this,localizacao,Toast.LENGTH_SHORT).show();
 
         registerForContextMenu((ListView) findViewById(R.id.lista));
-        arrayNota = new ArrayList<>();
+        //arrayNota = new ArrayList<>();
 
 
-        fillLista();
+        //fillLista();
+    }
+
+    private void preencheLista() {
+        c = db.query(false, Contrato.Notas.TABLE_NAME, Contrato.Notas.PROJECTION,
+                null, null, null, null, null, null);
+        /*
+        adapter = new SimpleCursorAdapter(
+                this,
+                android.R.layout.two_line_list_item,
+                c,
+                new String[] {Contrato.Notas.COLUMN_TITULO, Contrato.Notas.COLUMN_LOCALIZACAO},
+                new int[] {android.R.id.text1, android.R.id.text2},
+                SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+        */
+        madapter = new MyCursorAdapter(Second.this, c);
+        lista.setAdapter(madapter);
+
     }
 
     public void botao_xpto(View v){
@@ -103,33 +133,77 @@ public class Second extends AppCompatActivity {
     public boolean onContextItemSelected(MenuItem item) {
         // Handle item selection
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        int index = info.position;
-        Nota n = arrayNota.get(index);
+        //int index = info.position;
+        //Nota n = arrayNota.get(index);
+        int itemPosition = info.position;
+        c.moveToPosition(itemPosition);
+        int id_nota = c.getInt(c.getColumnIndex(Contrato.Notas._ID));
+        String titulo_nota = c.getString(c.getColumnIndex(Contrato.Notas.COLUMN_TITULO));
         switch (item.getItemId()) {
             case R.id.edit:
-                Toast.makeText(Second.this, "Editar " + n.getTitulo(), Toast.LENGTH_SHORT).show();
-                /*
-                edittitulo = (TextView) findViewById(R.id.edittitulo);
-                editdescricao = (TextView) findViewById(R.id.editdescricao);
-                editdata = (TextView) findViewById(R.id.editdata);
-                editlocalizacao = (TextView) findViewById(R.id.editlocalizacao);
-
-                Intent i = new Intent(Second.this, MainActivity.class);
-                i.putExtra(Utils.PARAM_TITULO, edittitulo.getText().toString());
-                i.putExtra(Utils.PARAM_DESCRICAO, editdescricao.getText().toString());
-                i.putExtra(Utils.PARAM_DATA, editdata.getText().toString());
-                i.putExtra(Utils.PARAM_LOCALIZACAO, editlocalizacao.getText().toString());
-                startActivityForResult(i, REQUEST_CODE_OP_1);
-                */
+                updateInDB(id_nota);
+                Toast.makeText(Second.this, " Atualizado com sucesso! ", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.remove:
-                arrayNota.remove(index);
-                Toast.makeText(Second.this, "Remover " + n.getTitulo(), Toast.LENGTH_SHORT).show();
-
-                fillLista();
+                Toast.makeText(Second.this, String.valueOf(itemPosition), Toast.LENGTH_SHORT).show();
+                Toast.makeText(Second.this, id_nota + "/" + titulo_nota, Toast.LENGTH_SHORT).show();
+                //pedir confirmação
+                //apagar da bd
+                deleteFromDB(id_nota);
+                //refresh da lista
+                Toast.makeText(Second.this, " Removido com sucesso! ", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onContextItemSelected(item);
         }
     }
+
+    private void updateInDB(int id_nota) {
+        ContentValues cv = new ContentValues();
+        cv.put(Contrato.Notas.COLUMN_TITULO,"Placas de sinalização caídas");
+        db.update(Contrato.Notas.TABLE_NAME, cv, Contrato.Notas._ID + " = ?", new String[]{id_nota+""});
+        refresh();
+    }
+
+    private void deleteFromDB(int id_nota) {
+        db.delete(Contrato.Notas.TABLE_NAME, Contrato.Notas._ID + " = ?", new String[]{id_nota+""});
+        refresh();
+    }
+
+    private void refresh() {
+        getCursor();
+        madapter.swapCursor(c);
+    }
+
+    private void getCursor(){
+        String sql = "Select " +
+                Contrato.Notas._ID + "," +
+                Contrato.Notas.COLUMN_TITULO + "," +
+                Contrato.Notas.COLUMN_DESCRICAO + "," +
+                Contrato.Notas.COLUMN_DATA + "," +
+                Contrato.Notas.COLUMN_LOCALIZACAO + "," +
+                Contrato.Notas.COLUMN_ID_UTILIZADOR + " FROM " +
+                Contrato.Notas.TABLE_NAME;
+
+        c = db.rawQuery(sql, null);
+    }
+
+/*
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+
+        if(!c.isClosed()){
+            c.close();
+            c = null;
+        }
+        if(!c_pessoas.isClosed()){
+            c_pessoas.close();
+            c_pessoas = null;
+        }
+        if(db.isOpen()){
+            db.close();
+            db = null;
+        }
+    }*/
 }

@@ -2,7 +2,10 @@ package com.pedroribeiro.intellicity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.Menu;
@@ -10,9 +13,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.pedroribeiro.intellicity.db.Contrato;
+import com.pedroribeiro.intellicity.db.DB;
 import com.pedroribeiro.intellicity.utils.Utils;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,6 +36,10 @@ public class MainActivity extends AppCompatActivity {
 
     private int REQUEST_CODE_OP_1 = 1;
 
+    DB mDbHelper;
+    SQLiteDatabase db;
+    Cursor c, c_pessoas;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
         textodata = (TextView) findViewById(R.id.txtdata);
         textolocalizacao = (TextView) findViewById(R.id.txtlocalizacao);
 
+        mDbHelper = new DB(this);
+        db = mDbHelper.getReadableDatabase();
 
         Toast.makeText(MainActivity.this, getResources().getString(R.string.bemvindo), Toast.LENGTH_SHORT).show();
     }
@@ -77,6 +90,15 @@ public class MainActivity extends AppCompatActivity {
             textolocalizacao.setText(localizacao);
             */
 
+            ContentValues cv = new ContentValues();
+            cv.put(Contrato.Notas.COLUMN_TITULO,"Linhas do piso gastas");
+            cv.put(Contrato.Notas.COLUMN_DESCRICAO,"Não se consegue ver a linha contínua");
+            cv.put(Contrato.Notas.COLUMN_DATA,"12.03.2020");
+            cv.put(Contrato.Notas.COLUMN_LOCALIZACAO,"Tregosa");
+            cv.put(Contrato.Notas.COLUMN_ID_UTILIZADOR,"1");
+            db.insert(Contrato.Notas.TABLE_NAME, null, cv);
+
+            //refresh();
 
             Intent i = new Intent(MainActivity.this, Second.class);
             i.putExtra(Utils.PARAM_TITULO, edittitulo.getText().toString());
@@ -166,6 +188,26 @@ public class MainActivity extends AppCompatActivity {
 
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+ */
+/*
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+
+        if(!c.isClosed()){
+            c.close();
+            c = null;
+        }
+        if(!c_pessoas.isClosed()){
+            c_pessoas.close();
+            c_pessoas = null;
+        }
+        if(db.isOpen()){
+            db.close();
+            db = null;
         }
     }
 
