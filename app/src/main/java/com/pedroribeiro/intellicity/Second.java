@@ -177,11 +177,11 @@ public class Second extends AppCompatActivity {
 
     private void getCursor(){
         String sql = "Select " +
-                Contrato.Notas._ID + "," +
                 Contrato.Notas.COLUMN_TITULO + "," +
                 Contrato.Notas.COLUMN_DESCRICAO + "," +
                 Contrato.Notas.COLUMN_DATA + "," +
                 Contrato.Notas.COLUMN_LOCALIZACAO + "," +
+                Contrato.Notas._ID + "," +
                 Contrato.Notas.COLUMN_ID_UTILIZADOR + " FROM " +
                 Contrato.Notas.TABLE_NAME;
 
