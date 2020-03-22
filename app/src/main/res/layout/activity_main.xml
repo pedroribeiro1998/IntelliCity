@@ -16,10 +16,11 @@
         android:id="@+id/textotitulo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/inserir_nota"
-        android:textColor="@color/colorAccent"
+        android:text="@string/iniciar_sessao"
+        android:textColor="@color/black"
         android:textStyle="bold"
         android:textSize="20sp"
+        android:layout_marginTop="40dp"
         android:layout_centerHorizontal="true"/>
 
     <LinearLayout
@@ -28,53 +29,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="40dp">
 
         <EditText
             android:id="@+id/edittitulo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/titulo" />
+            android:hint="@string/username" />
         <EditText
             android:id="@+id/editdescricao"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/descricao" />
-        <EditText
-            android:id="@+id/editdata"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/data" />
-        <EditText
-            android:id="@+id/editlocalizacao"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/localizacao" />
+            android:hint="@string/password" />
 
+        <Button
+            android:layout_marginTop="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/login"
+            android:onClick="login"/>
     </LinearLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/txttitulo"
-        android:layout_below="@id/linear"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/txtdescricao"
-        android:layout_below="@id/txttitulo"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/txtdata"
-        android:layout_below="@id/txtdescricao"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/txtlocalizacao"
-        android:layout_below="@id/txtdata"/>
-
-
 
     <LinearLayout
         android:layout_alignParentBottom="true"
@@ -86,22 +60,10 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/guardar"
-            android:onClick="guardar"/>
+            android:text="@string/consultarNotas"
+            android:onClick="verNotas"/>
 
-        <Button
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/limpar"
-            android:onClick="limpar"/>
 
-        <Button
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/botao2"
-            android:onClick="botao2"/>
 
     </LinearLayout>
 </RelativeLayout>

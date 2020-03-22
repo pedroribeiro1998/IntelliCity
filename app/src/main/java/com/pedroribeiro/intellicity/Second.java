@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -142,16 +143,16 @@ public class Second extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.edit:
                 updateInDB(id_nota);
-                Toast.makeText(Second.this, " Atualizado com sucesso! ", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(Second.this, " Atualizado com sucesso! ", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.remove:
-                Toast.makeText(Second.this, String.valueOf(itemPosition), Toast.LENGTH_SHORT).show();
-                Toast.makeText(Second.this, id_nota + "/" + titulo_nota, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(Second.this, String.valueOf(itemPosition), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(Second.this, id_nota + "/" + titulo_nota, Toast.LENGTH_SHORT).show();
                 //pedir confirmação
                 //apagar da bd
                 deleteFromDB(id_nota);
                 //refresh da lista
-                Toast.makeText(Second.this, " Removido com sucesso! ", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(Second.this, " Removido com sucesso! ", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -186,6 +187,40 @@ public class Second extends AppCompatActivity {
                 Contrato.Notas.TABLE_NAME;
 
         c = db.rawQuery(sql, null);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_ativ_1, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.opcao1:
+                //Toast.makeText(Second.this, "Voltar", Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(Second.this, NotasActivity.class);
+                startActivity(i);
+                return true;
+
+            case R.id.opcao2:
+                Toast.makeText(Second.this, "Sobre", Toast.LENGTH_SHORT).show();
+                return true;
+                /*
+            case R.id.opcao3:
+                Toast.makeText(NotasActivity.this, "Opcao3", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.opcao4:
+                Toast.makeText(NotasActivity.this, "Opcao4", Toast.LENGTH_SHORT).show();
+                return true;
+                 */
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 /*

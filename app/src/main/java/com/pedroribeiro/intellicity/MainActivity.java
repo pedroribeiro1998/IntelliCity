@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         mDbHelper = new DB(this);
         db = mDbHelper.getReadableDatabase();
 
-        Toast.makeText(MainActivity.this, getResources().getString(R.string.bemvindo), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(MainActivity.this, getResources().getString(R.string.bemvindo), Toast.LENGTH_SHORT).show();
     }
 
     public void guardar(View v){
@@ -114,30 +114,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void limpar(View v){
-        //EditText edittitulo = (EditText) findViewById(R.id.edittitulo);
-        //EditText editdescricao = (EditText) findViewById(R.id.editdescricao);
-        //EditText editdata = (EditText) findViewById(R.id.editdata);
-        //EditText editlocalizacao = (EditText) findViewById(R.id.editlocalizacao);
-
-        edittitulo.setText("");
-        editdescricao.setText("");
-        editdata.setText("");
-        editlocalizacao.setText("");
-
-        //TextView textotitulo = (TextView) findViewById(R.id.txttitulo);
-        //TextView textodescricao = (TextView) findViewById(R.id.txtdescricao);
-        //TextView textodata = (TextView) findViewById(R.id.txtdata);
-        //TextView textolocalizacao = (TextView) findViewById(R.id.txtlocalizacao);
-
-        textotitulo.setText("");
-        textodescricao.setText("");
-        textodata.setText("");
-        textolocalizacao.setText("");
+    public void verNotas(View v){
+        Intent i = new Intent(MainActivity.this, NotasActivity.class);
+        startActivity(i);
     }
 
-    public void botao2(View v){
-        Intent i = new Intent(MainActivity.this, Second.class);
+
+    // após login terá de ir para a página do mapa
+    public void login(View v){
+        Intent i = new Intent(MainActivity.this, MapActivity.class);
         /*
         i.putExtra(Utils.PARAM_TITULO, edittitulo.getText().toString());
         i.putExtra(Utils.PARAM_DESCRICAO, editdescricao.getText().toString());

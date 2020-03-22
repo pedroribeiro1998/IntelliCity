@@ -3,7 +3,7 @@
     <string name="bemvindo">Bienvenue dans l\'appli</string>
     <string name="bemvindo2">Cours de français Java MSG</string>
     <string name="nome">nom</string>
-    <string name="inserir_nota">inserir nova nota fr</string>
+    <string name="iniciar_sessao">Iniciar Sessão fr</string>
     <string name="titulo">titulo fr</string>
     <string name="descricao">descricao fr</string>
     <string name="data">data fr</string>
@@ -14,9 +14,15 @@
     <string name="botao2">Consultar fr</string>
     <string name="botao_xpto">Back fr</string>
     <string name="opcao1">Opção1 fr</string>
-    <string name="opcao2">Opção2 fr</string>
+    <string name="opcao2">Login fr</string>
     <string name="opcao4">Opção4 fr</string>
     <string name="opcao3">Opção3 fr</string>
     <string name="editar">Editar fr</string>
     <string name="remover">Remover fr</string>
+    <string name="consultarNotas">Ver Notas fr</string>
+    <string name="login">login fr</string>
+    <string name="username">username fr</string>
+    <string name="password">password fr</string>
+    <string name="about">Sobre</string>
+    <string name="textotitulo">Inserir nova nota fr</string>
 </resources>

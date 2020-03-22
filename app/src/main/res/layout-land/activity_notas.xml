@@ -9,17 +9,16 @@
     android:paddingLeft="64dp"
     android:paddingRight="64dp"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity">
+    tools:context=".NotasActivity">
 
     <TextView
         android:id="@+id/textotitulo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/iniciar_sessao"
-        android:textColor="@color/black"
+        android:text="@string/textotitulo"
+        android:textColor="@color/colorAccent"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:layout_marginTop="40dp"
         android:layout_centerHorizontal="true"/>
 
     <LinearLayout
@@ -34,19 +33,22 @@
             android:id="@+id/edittitulo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/username" />
+            android:hint="@string/titulo" />
         <EditText
             android:id="@+id/editdescricao"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/password" />
-
-        <Button
-            android:layout_marginTop="30dp"
+            android:hint="@string/descricao" />
+        <EditText
+            android:id="@+id/editdata"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/login"
-            android:onClick="login"/>
+            android:hint="@string/data" />
+        <EditText
+            android:id="@+id/editlocalizacao"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/localizacao" />
 
     </LinearLayout>
 
@@ -60,8 +62,22 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/consultarNotas"
-            android:onClick="verNotas"/>
+            android:text="@string/guardar"
+            android:onClick="guardar"/>
+
+        <Button
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/limpar"
+            android:onClick="limpar"/>
+
+        <Button
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/botao2"
+            android:onClick="botao2"/>
 
     </LinearLayout>
 </RelativeLayout>
