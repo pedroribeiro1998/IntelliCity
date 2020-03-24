@@ -25,4 +25,14 @@
     <string name="password">password en</string>
     <string name="about">Sobre</string>
     <string name="textotitulo">Inserir nova nota en</string>
+    <string name="service_not_available">service_not_available</string>
+    <string name="invalid_lat_long_used">invalid_lat_long_used</string>
+    <string name="no_address_found">no_address_found</string>
+    <string name="address_found">address_found</string>
+    <string name="invalid_parameters">invalid_parameters</string>
+    <string name="geofence_transition_invalid_type">geofence_transition_invalid_type</string>
+    <string name="geofence_transition_entered">geofence_transition_entered</string>
+    <string name="unknown_geofence_transition">unknown_geofence_transition</string>
+    <string name="geofence_transition_exited">geofence_transition_exited</string>
+    <string name="geofence_transition_notification_text">geofence_transition_notification_text</string>
 </resources>

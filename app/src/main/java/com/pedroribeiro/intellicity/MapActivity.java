@@ -1,26 +1,295 @@
 package com.pedroribeiro.intellicity;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-public class MapActivity extends AppCompatActivity {
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofenceStatusCodes;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.pedroribeiro.intellicity.utils.Utils;
+
+import java.util.List;
+
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
+GoogleMap.OnMapLongClickListener, LocationListener, GoogleApiClient.ConnectionCallbacks,
+GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
+
+    GoogleMap mMap;
+    private GoogleApiClient mGoogleApiClient;
+    LocationRequest mLocationRequest;
+    private AddressResultReceiver mResultReceiver;
+    List<Geofence> mGeofenceList;
+    PendingIntent mGeofencePendingIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        mResultReceiver = new AddressResultReceiver(new Handler());
+        
+        // a partir da api 12
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this); // prepara o mapa e retorna para o método onMapReady
+
+        mLocationRequest = new LocationRequest();
+        // iniciar o serviço do google play
+        buildGoogleApiClient();
+        //createGeoFence();
     }
 
-    public void botao_xpto(View v){
-        Intent i = new Intent(MapActivity.this, MainActivity.class);
+    public void onResult(Status status) {
+        if(status.isSuccess()){
+            // Update state and save in shared preferences
+            Toast.makeText(
+                    this,
+                    "geofence added",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }else{
+            Toast.makeText(
+                    this,
+                    "geofence error",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
+    }
+
+    private GeofencingRequest getGeofencingRequest(){
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.addGeofences(mGeofenceList);
+        return builder.build();
+    }
+
+    private void createGeoFence() {
+        mGeofenceList.add(new Geofence.Builder()
+               // set the request id of the geofence. This is a string to indentify this geofence
+               .setRequestId("GEOFENCE-1")
+                .setCircularRegion(
+                        41.1,
+                        -8.14,
+                        Constants.GEOFENCE_RADIUS_IN_METERS
+                )
+                .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build());
+        addGeofence();
+    }
+
+    private void addGeofence() {
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                                                    != PackageManager.PERMISSION_GRANTED){
+            //check permissions now
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        }else{
+            LocationServices.GeofencingApi.addGeofences(
+                    mGoogleApiClient,
+                    getGeofencingRequest(),
+                    getGeofencePendingIntent()
+            ).setResultCallback(this);
+        }
+    }
+
+    private PendingIntent getGeofencePendingIntent(){
+        // reuse the PendingIntent if we already have it
+        if(mGeofencePendingIntent != null){
+            return mGeofencePendingIntent;
+        }
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        // we use FLAG_UPDATE_CURRENT so that we get the same pending intent back wher
+        // calling addGeofences() and removeGeofences()
+        return PendingIntent.getService(this, 0, intent, PendingIntent.
+                FLAG_UPDATE_CURRENT);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        mMap = map;
+        LatLng home = new LatLng(41.63830638,-8.75326574);
+        map.addMarker(new MarkerOptions()
+                            .position(home)
+                            .title("Esta é a minha casa!"));
+        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+
+        map.setOnMapClickListener(this);
+        map.setOnMapLongClickListener(this);
+
+        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(home,18));
+        focusMapa(home);
+    }
+
+    private void focusMapa(LatLng latLng){
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(latLng)   // sets the center of the map to mountain view
+                .zoom(19)       // sets the zoom
+                .bearing(45)    // sets the orientation of the camera to east
+                .tilt(70)       // sets the tilt of the camera to 60 degrees
+                .build();       // creates a CameraPosition from the builder
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        Intent i = new Intent(this, StreetViewActivity.class);
+        i.putExtra(Utils.LAT, latLng.latitude);
+        i.putExtra(Utils.LONG, latLng.longitude);
         startActivity(i);
+    }
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        Toast.makeText(this,"Latitude: " + String.valueOf(latLng.latitude)
+                                        +  " longitude: " + String.valueOf(latLng.longitude),
+                                        Toast.LENGTH_SHORT).show();
+        mMap.addMarker(new MarkerOptions()
+                            .position(latLng));
+
+        Location l = new Location("");
+        l.setLatitude(latLng.latitude);
+        l.setLongitude(latLng.longitude);
+
+        //startIntentService(l);
+    }
+
+    private void createLocationRequest() {
+        //mLocationRequest = LocationRequest.create();
+        mLocationRequest.setInterval(10000); // 10000 milissegundos = 10 segundos
+        mLocationRequest.setFastestInterval(10000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+
+    protected synchronized void buildGoogleApiClient() {
+        // construir o cliente da api do google que será iniciado no onStart()
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        createLocationRequest();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // iniciar o serviço da google play
+        mGoogleApiClient.connect();
+    }
+
+     @Override
+     public void onConnected(Bundle connectionHint){
+        // momento em que o serviço do google play é comectado ( depois de mGoogleApiClient.connect(); )
+         startLocationUpdates();
+         startIntentCoordinatesService();
+     }
+
+    private void startLocationUpdates() {
+        // pedido de sinal propriamente dito
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED){
+            // check permissions now
+            ActivityCompat.requestPermissions(this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        }else{
+            //LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            mMap.setMyLocationEnabled(true); //quadradinho para obter localização
+        }
+    }
+
+
+    @Override
+    public void onLocationChanged(Location location) {
+        //aqui podemos gravar para a bd, centrar mapa nesse ponto, etc
+        Toast.makeText(this, "gps recebido -> lat: " + location.getLatitude() + " || long: " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+        //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+    }
+
+
+    protected void startIntentService(Location location){
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+        intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, location);
+        startService(intent);
+    }
+
+    protected void startIntentCoordinatesService(){
+        Intent intent = new Intent(this, FetchCoordinatesIntentService.class);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, "Viana do Castelo, Portugal");
+        intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        startService(intent);
+    }
+
+    
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions,
+                                           int[] grantResults){
+        if(requestCode == 0){
+            if(grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_DENIED){
+                if(requestCode == 0){
+                    startLocationUpdates();
+                }
+            } else{
+                // permission was denied or request was cancelled
+            }
+        }
     }
 
     /* toolbar superior*/
@@ -55,6 +324,47 @@ public class MapActivity extends AppCompatActivity {
 
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+    /* toolbar superior*/
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //parar
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //ativar
+    }
+
+    class AddressResultReceiver extends ResultReceiver{
+        public AddressResultReceiver(Handler handler){
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData){
+            if(resultData.containsKey(Constants.RESULT_DATA_KEY)){
+                // display the address string
+                // or an error message sent from the intent service
+                String mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
+                Toast.makeText(MapActivity.this, mAddressOutput, Toast.LENGTH_SHORT).show();
+
+                // show a toast message if an address was found
+                /*if(resultCode == Constants.SUCCESS_RESULT){
+                    Toast.makeText(MapActivity.this, getString(R.string.address_found), Toast.LENGTH_SHORT).show();
+                }*/
+            }
+            if(resultData.containsKey(Constants.LATITUDE)){
+                LatLng l = new LatLng(
+                        resultData.getDouble(Constants.LATITUDE),
+                        resultData.getDouble(Constants.LONGITUDE)
+                );
+                focusMapa(l);
+            }
         }
     }
 }

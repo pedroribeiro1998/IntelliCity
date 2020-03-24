@@ -8,6 +8,9 @@ public class Utils {
 
     public static String PARAM_OUTPUT = "output";
 
+    public static String LAT = "";
+    public static String LONG = "";
+
 
 
 
