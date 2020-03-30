@@ -61,6 +61,11 @@ public class MainActivity extends AppCompatActivity {
         //Toast.makeText(MainActivity.this, getResources().getString(R.string.bemvindo), Toast.LENGTH_SHORT).show();
     }
 
+    public void registar_Utilizador(View view){
+        Intent newActivityIntent = new Intent(this,RegistarUtilizadorActivity.class);
+        startActivity(newActivityIntent);
+    }
+
     public void guardar(View v){
         //EditText edittitulo = (EditText) findViewById(R.id.edittitulo);
         //EditText editdescricao = (EditText) findViewById(R.id.editdescricao);

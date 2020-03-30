@@ -10,13 +10,13 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".RegistarUtilizadorActivity">
 
     <TextView
-        android:id="@+id/textotitulo"
+        android:id="@+id/registar_texto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/iniciar_sessao"
+        android:text="@string/registar_texto"
         android:textColor="@color/black"
         android:textStyle="bold"
         android:textSize="20sp"
@@ -25,7 +25,7 @@
 
     <LinearLayout
         android:id="@+id/linear"
-        android:layout_below="@id/textotitulo"
+        android:layout_below="@id/registar_texto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -41,22 +41,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/password" />
+        <EditText
+            android:id="@+id/edittitulo1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/username" />
+        <EditText
+            android:id="@+id/editdescricao1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/password" />
 
         <Button
             android:layout_marginTop="30dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/login"
-            android:onClick="login"/>
+            android:text="@string/registar_user"
+            android:onClick="registar"/>
 
-        <TextView
-            android:id="@+id/text2"
-            android:layout_marginTop="30dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:onClick="registar_Utilizador"
-            android:text="@string/registar_user"/>
     </LinearLayout>
 
     <LinearLayout
@@ -64,14 +66,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-
+        <!--
         <Button
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/consultarNotas"
             android:onClick="verNotas"/>
-
+        -->
 
 
     </LinearLayout>
