@@ -32,6 +32,11 @@
         android:layout_marginTop="40dp">
 
         <EditText
+            android:id="@+id/edittitulo0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="nome" />
+        <EditText
             android:id="@+id/edittitulo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -45,12 +50,12 @@
             android:id="@+id/edittitulo1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/username" />
+            android:hint="Dta nascimento" />
         <EditText
             android:id="@+id/editdescricao1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/password" />
+            android:hint="morada" />
 
         <Button
             android:layout_marginTop="30dp"
