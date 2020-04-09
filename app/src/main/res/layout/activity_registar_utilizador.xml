@@ -32,27 +32,28 @@
         android:layout_marginTop="40dp">
 
         <EditText
-            android:id="@+id/edittitulo0"
+            android:id="@+id/nome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="nome" />
         <EditText
-            android:id="@+id/edittitulo"
+            android:id="@+id/username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/username" />
         <EditText
-            android:id="@+id/editdescricao"
+            android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:inputType="textPassword"
             android:hint="@string/password" />
         <EditText
-            android:id="@+id/edittitulo1"
+            android:id="@+id/dt_nasc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Dta nascimento" />
+            android:hint="@string/dta_nascimento" />
         <EditText
-            android:id="@+id/editdescricao1"
+            android:id="@+id/morada"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="morada" />

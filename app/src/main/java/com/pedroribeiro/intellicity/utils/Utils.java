@@ -11,6 +11,8 @@ public class Utils {
     public static String LAT = "";
     public static String LONG = "";
 
+    public static String param_status = "";
+    public static String param_dados = "";
 
 
 

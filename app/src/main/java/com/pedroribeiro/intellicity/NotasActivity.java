@@ -1,26 +1,25 @@
 package com.pedroribeiro.intellicity;
 
-        import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.text.Editable;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 
-        import android.content.ContentValues;
-        import android.content.Intent;
-        import android.database.Cursor;
-        import android.database.sqlite.SQLiteDatabase;
-        import android.os.Bundle;
-        import android.text.Editable;
-        import android.view.Menu;
-        import android.view.MenuInflater;
-        import android.view.MenuItem;
-        import android.view.View;
-        import android.widget.EditText;
-        import android.widget.ListView;
-        import android.widget.SimpleCursorAdapter;
-        import android.widget.TextView;
-        import android.widget.Toast;
-
-        import com.pedroribeiro.intellicity.db.Contrato;
-        import com.pedroribeiro.intellicity.db.DB;
-        import com.pedroribeiro.intellicity.utils.Utils;
+import com.pedroribeiro.intellicity.db.Contrato;
+import com.pedroribeiro.intellicity.db.DB;
+import com.pedroribeiro.intellicity.utils.Utils;
 
 public class NotasActivity extends AppCompatActivity {
 
@@ -28,11 +27,6 @@ public class NotasActivity extends AppCompatActivity {
     EditText editdescricao;
     EditText editdata;
     EditText editlocalizacao;
-
-    TextView textotitulo;
-    TextView textodescricao;
-    TextView textodata;
-    TextView textolocalizacao;
 
     private int REQUEST_CODE_OP_1 = 1;
 
@@ -50,11 +44,6 @@ public class NotasActivity extends AppCompatActivity {
         editdata = (EditText) findViewById(R.id.editdata);
         editlocalizacao = (EditText) findViewById(R.id.editlocalizacao);
 
-        textotitulo = (TextView) findViewById(R.id.txttitulo);
-        textodescricao = (TextView) findViewById(R.id.txtdescricao);
-        textodata = (TextView) findViewById(R.id.txtdata);
-        textolocalizacao = (TextView) findViewById(R.id.txtlocalizacao);
-
         mDbHelper = new DB(this);
         db = mDbHelper.getReadableDatabase();
 
@@ -62,10 +51,6 @@ public class NotasActivity extends AppCompatActivity {
     }
 
     public void guardar(View v){
-        //EditText edittitulo = (EditText) findViewById(R.id.edittitulo);
-        //EditText editdescricao = (EditText) findViewById(R.id.editdescricao);
-        //EditText editdata = (EditText) findViewById(R.id.editdata);
-        //EditText editlocalizacao = (EditText) findViewById(R.id.editlocalizacao);
         String titulo = edittitulo.getText().toString();
         String descricao = editdescricao.getText().toString();
         String data = editdata.getText().toString();
@@ -79,16 +64,6 @@ public class NotasActivity extends AppCompatActivity {
         }else if(localizacao.equals("")){
             Toast.makeText(NotasActivity.this, "Preencha o campo localizacao", Toast.LENGTH_SHORT).show();
         }else{
-            //TextView textotitulo = (TextView) findViewById(R.id.txttitulo);
-            //TextView textodescricao = (TextView) findViewById(R.id.txtdescricao);
-            //TextView textodata = (TextView) findViewById(R.id.txtdata);
-            //TextView textolocalizacao = (TextView) findViewById(R.id.txtlocalizacao);
-            /*
-            textotitulo.setText(titulo);
-            textodescricao.setText(descricao);
-            textodata.setText(data);
-            textolocalizacao.setText(localizacao);
-            */
             /*
             ContentValues cv = new ContentValues();
             cv.put(Contrato.Notas.COLUMN_TITULO,"Linhas do piso gastas");

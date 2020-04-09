@@ -17,12 +17,21 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.pedroribeiro.intellicity.adapters.CustomArrayAdapter;
 import com.pedroribeiro.intellicity.adapters.MyCursorAdapter;
 import com.pedroribeiro.intellicity.db.Contrato;
 import com.pedroribeiro.intellicity.db.DB;
 import com.pedroribeiro.intellicity.entities.Nota;
 import com.pedroribeiro.intellicity.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -52,19 +61,16 @@ public class Second extends AppCompatActivity {
         mDbHelper = new DB(this);
         db = mDbHelper.getReadableDatabase();
 
-        lista = (ListView) findViewById(R.id.lista);
-        preencheLista();
+        //lista = (ListView) findViewById(R.id.lista);                                  //descomentar
+       // preencheLista();                                                              //descomentar
 
         //Toast.makeText(Second.this,titulo,Toast.LENGTH_SHORT).show();
         //Toast.makeText(Second.this,descricao,Toast.LENGTH_SHORT).show();
         //Toast.makeText(Second.this,data,Toast.LENGTH_SHORT).show();
         //Toast.makeText(Second.this,localizacao,Toast.LENGTH_SHORT).show();
 
-        registerForContextMenu((ListView) findViewById(R.id.lista));
+        //registerForContextMenu((ListView) findViewById(R.id.lista));                  //descomentar
         //arrayNota = new ArrayList<>();
-
-
-        //fillLista();
     }
 
     private void preencheLista() {
@@ -84,43 +90,81 @@ public class Second extends AppCompatActivity {
 
     }
 
-    public void botao_xpto(View v){
-        Intent output = new Intent();
-        output.putExtra(Utils.PARAM_OUTPUT, "resultado teste");
-        setResult(RESULT_OK, output);
-        finish();
+    public void invokeWS(View v){
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/1";
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            ((TextView) findViewById(R.id.data)).setText(response.getString("titulo"));
+                        } catch (JSONException ex) {
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        ((TextView) findViewById(R.id.data)).setText(error.getMessage());
+                    }
+                });
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }
+/*
+    public void invokeWS_2(View v){ //versão da professora, não funciona
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
-    public  void fillLista(){
-        /*
-        ArrayList<String> arrayItems = new ArrayList<>();
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            ((TextView) findViewById(R.id.texto)).setText(response.getString(Utils.param_status));
+                            JSONArray arr = response.getJSONArray(Utils.param_dados);
+                            for(int i = 0; i < arr.length(); i++){
+                                JSONObject obj = arr.getJSONObject(i);
+                                Toast.makeText(Second.this, obj.getString("titulo") + "; " +
+                                        obj.getString("descricao"), Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException ex) { }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        ((TextView) findViewById(R.id.texto)).setText(error.getMessage());
+                    }
+                });
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+    }*/
 
-        arrayItems.add("Segunda");
-        arrayItems.add("Terca");
-        arrayItems.add("Quarta");
-        arrayItems.add("Quinta");
-        arrayItems.add("Sexta");
-        arrayItems.add("Sabado");
-        arrayItems.add("Domingo");
+    public void invokeWS_2(View v){
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
+        JsonArrayRequest jsObjRequest = new JsonArrayRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
 
-        ArrayAdapter<String> itemsAdapter =
-                new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrayItems);
-        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
-        */
-
-        String titulo = getIntent().getStringExtra(Utils.PARAM_TITULO);
-        String descricao = getIntent().getStringExtra(Utils.PARAM_DESCRICAO);
-        String data = getIntent().getStringExtra(Utils.PARAM_DATA);
-        String localizacao = getIntent().getStringExtra(Utils.PARAM_LOCALIZACAO);
-
-        //ArrayList<Nota> arrayNota = new ArrayList<>();
-        arrayNota.add(new Nota ("titulo1","descricao1", "data1", "localizacao1"));
-        arrayNota.add(new Nota ("titulo2","descricao2", "data2", "localizacao2"));
-        arrayNota.add(new Nota("titulo3","descricao3", "data3", "localizacao3"));
-        arrayNota.add(new Nota(titulo,descricao,data,localizacao));
-
-        CustomArrayAdapter itemsAdapter = new CustomArrayAdapter(this, arrayNota);
-        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            for(int i = 0; i < response.length(); i++){
+                                JSONObject obj = response.getJSONObject(i);
+                                String titulo = obj.getString("titulo");
+                                String descricao = obj.getString("descricao");
+                                ((TextView) findViewById(R.id.data)).setText(titulo);
+                                ((TextView) findViewById(R.id.texto)).setText(descricao);
+                                //guardar os dados num array e enviar para um adapter para construir uma lista?
+                            }
+                        } catch (JSONException ex) { }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        ((TextView) findViewById(R.id.texto)).setText(error.getMessage());
+                    }
+                });
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }
 
     @Override

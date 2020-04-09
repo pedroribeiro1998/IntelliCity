@@ -18,9 +18,20 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.pedroribeiro.intellicity.db.Contrato;
 import com.pedroribeiro.intellicity.db.DB;
 import com.pedroribeiro.intellicity.utils.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     TextView textodescricao;
     TextView textodata;
     TextView textolocalizacao;
+
+    EditText editusername;
+    EditText editpassword;
 
     private int REQUEST_CODE_OP_1 = 1;
 
@@ -50,10 +64,8 @@ public class MainActivity extends AppCompatActivity {
         editdata = (EditText) findViewById(R.id.editdata);
         editlocalizacao = (EditText) findViewById(R.id.editlocalizacao);
 
-        textotitulo = (TextView) findViewById(R.id.txttitulo);
-        textodescricao = (TextView) findViewById(R.id.txtdescricao);
-        textodata = (TextView) findViewById(R.id.txtdata);
-        textolocalizacao = (TextView) findViewById(R.id.txtlocalizacao);
+        editusername = (EditText) findViewById(R.id.username);
+        editpassword = (EditText) findViewById(R.id.password);
 
         mDbHelper = new DB(this);
         db = mDbHelper.getReadableDatabase();
@@ -66,75 +78,76 @@ public class MainActivity extends AppCompatActivity {
         startActivity(newActivityIntent);
     }
 
-    public void guardar(View v){
-        //EditText edittitulo = (EditText) findViewById(R.id.edittitulo);
-        //EditText editdescricao = (EditText) findViewById(R.id.editdescricao);
-        //EditText editdata = (EditText) findViewById(R.id.editdata);
-        //EditText editlocalizacao = (EditText) findViewById(R.id.editlocalizacao);
-        String titulo = edittitulo.getText().toString();
-        String descricao = editdescricao.getText().toString();
-        String data = editdata.getText().toString();
-        String localizacao = editlocalizacao.getText().toString();
-        if(titulo.equals("")){
-            Toast.makeText(MainActivity.this, "Preencha o campo titulo", Toast.LENGTH_SHORT).show();
-        }else if(descricao.equals("")){
-            Toast.makeText(MainActivity.this, "Preencha o campo descricao", Toast.LENGTH_SHORT).show();
-        }else if(data.equals("")){
-            Toast.makeText(MainActivity.this, "Preencha o campo data", Toast.LENGTH_SHORT).show();
-        }else if(localizacao.equals("")){
-            Toast.makeText(MainActivity.this, "Preencha o campo localizacao", Toast.LENGTH_SHORT).show();
-        }else{
-            //TextView textotitulo = (TextView) findViewById(R.id.txttitulo);
-            //TextView textodescricao = (TextView) findViewById(R.id.txtdescricao);
-            //TextView textodata = (TextView) findViewById(R.id.txtdata);
-            //TextView textolocalizacao = (TextView) findViewById(R.id.txtlocalizacao);
-            /*
-            textotitulo.setText(titulo);
-            textodescricao.setText(descricao);
-            textodata.setText(data);
-            textolocalizacao.setText(localizacao);
-            */
-
-            ContentValues cv = new ContentValues();
-            cv.put(Contrato.Notas.COLUMN_TITULO,"Linhas do piso gastas");
-            cv.put(Contrato.Notas.COLUMN_DESCRICAO,"Não se consegue ver a linha contínua");
-            cv.put(Contrato.Notas.COLUMN_DATA,"12.03.2020");
-            cv.put(Contrato.Notas.COLUMN_LOCALIZACAO,"Tregosa");
-            cv.put(Contrato.Notas.COLUMN_ID_UTILIZADOR,"1");
-            db.insert(Contrato.Notas.TABLE_NAME, null, cv);
-
-            //refresh();
-
-            Intent i = new Intent(MainActivity.this, Second.class);
-            i.putExtra(Utils.PARAM_TITULO, edittitulo.getText().toString());
-            i.putExtra(Utils.PARAM_DESCRICAO, editdescricao.getText().toString());
-            i.putExtra(Utils.PARAM_DATA, editdata.getText().toString());
-            i.putExtra(Utils.PARAM_LOCALIZACAO, editlocalizacao.getText().toString());
-            startActivityForResult(i, REQUEST_CODE_OP_1);
-
-            edittitulo.setText("");
-            editdescricao.setText("");
-            editdata.setText("");
-            editlocalizacao.setText("");
-        }
-    }
-
     public void verNotas(View v){
         Intent i = new Intent(MainActivity.this, NotasActivity.class);
         startActivity(i);
     }
 
+    // validar input de strings
+    public static boolean isNullOrEmpty(String str) {
+        if(str != null && !str.trim().isEmpty())
+            return false;
+        return true;
+    }
 
     // após login terá de ir para a página do mapa
     public void login(View v){
-        Intent i = new Intent(MainActivity.this, MapActivity.class);
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/loginUser";
+
+        String username = editusername.getText().toString();
+        String password = editpassword.getText().toString();
+
+        if(isNullOrEmpty(username)) {
+            Toast.makeText(MainActivity.this, "Tem de preencher o username!", Toast.LENGTH_SHORT).show();
+        }else if(isNullOrEmpty(password)) {
+            Toast.makeText(MainActivity.this, "Tem de preencher a password!", Toast.LENGTH_SHORT).show();
+        }else{
+            Map<String, String> jsonParams = new HashMap<String, String>();
+            jsonParams.put( "username" , username);
+            jsonParams.put( "password" , password);
+
+            JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+                    new JSONObject(jsonParams),
+                    new Response.Listener<JSONObject>() {
+
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                if(response.getBoolean("status")){
+                                    Toast.makeText(MainActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                    Intent i = new Intent(MainActivity.this, MapActivity.class);
+                                    startActivity(i);
+                                } else{
+                                    Toast.makeText(MainActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (JSONException ex) { }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError{
+                    HashMap<String, String> headers = new HashMap<String, String>();
+                    headers.put("Content-Type", "application/json; charset=utf-8");
+                    headers.put("User-agent", System.getProperty("http.agent"));
+                    return headers;
+                }
+            };
+            // Access the RequestQueue through your singleton class.
+            MySingleton.getInstance(this).addToRequestQueue(postRequest);
+        }
+
+
         /*
         i.putExtra(Utils.PARAM_TITULO, edittitulo.getText().toString());
         i.putExtra(Utils.PARAM_DESCRICAO, editdescricao.getText().toString());
         i.putExtra(Utils.PARAM_DATA, editdata.getText().toString());
         i.putExtra(Utils.PARAM_LOCALIZACAO, editlocalizacao.getText().toString());
         */
-        startActivity(i);
         //startActivityForResult(i, REQUEST_CODE_OP_1);
     }
 
