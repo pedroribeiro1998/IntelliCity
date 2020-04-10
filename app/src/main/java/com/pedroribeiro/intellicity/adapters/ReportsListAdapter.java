@@ -1,7 +1,9 @@
 package com.pedroribeiro.intellicity.adapters;
 
 import android.content.Context;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -89,7 +91,7 @@ public class ReportsListAdapter extends RecyclerView.Adapter<ReportsListAdapter.
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnCreateContextMenuListener {
         // each data item is just a string in this case
         public TextView textView, titulo, descricao, data;
         ItemClickListener itemClickListener;
@@ -105,6 +107,7 @@ public class ReportsListAdapter extends RecyclerView.Adapter<ReportsListAdapter.
 
             this.itemClickListener = itemClickListener;
             cardView.setOnClickListener(this);
+            itemView.setOnCreateContextMenuListener(this);
         }
 
         /*public MyViewHolder(View convertView) {
@@ -116,6 +119,13 @@ public class ReportsListAdapter extends RecyclerView.Adapter<ReportsListAdapter.
         @Override
         public void onClick(View v) {
             itemClickListener.onItemClick(v, getAdapterPosition());
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+           /* super.onCreateContextMenu(menu, v, menuinfo);
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_cont_1, menu);*/
         }
     }
 

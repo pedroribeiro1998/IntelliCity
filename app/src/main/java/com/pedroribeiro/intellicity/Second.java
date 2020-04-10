@@ -58,6 +58,7 @@ public class Second extends AppCompatActivity {
     MyCursorAdapter madapter;
 
     //recyclerView para listar os reports da BD
+    //List<Report> reports_detalhe_List = (ArrayList<Report>) getIntent().getSerializableExtra("reportes");
     List<Report> reports_detalhe_List;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter rvAdapter;
@@ -123,6 +124,7 @@ public class Second extends AppCompatActivity {
                                 rvAdapter.notifyDataSetChanged();
                                 recyclerView.setAdapter(rvAdapter);
                             }
+                            Log.d("PONTOS", "onResponse: " + reports_detalhe_List);
                         } catch (JSONException ex) { }
                     }
                 }, new Response.ErrorListener() {

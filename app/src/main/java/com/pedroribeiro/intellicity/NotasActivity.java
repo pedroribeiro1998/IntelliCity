@@ -1,12 +1,17 @@
 package com.pedroribeiro.intellicity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Editable;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,6 +26,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.pedroribeiro.intellicity.adapters.ReportsListAdapter;
 import com.pedroribeiro.intellicity.db.Contrato;
 import com.pedroribeiro.intellicity.db.DB;
 import com.pedroribeiro.intellicity.entities.Report;
@@ -32,6 +38,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class NotasActivity extends AppCompatActivity {
 
@@ -46,6 +53,13 @@ public class NotasActivity extends AppCompatActivity {
     SQLiteDatabase db;
     Cursor c, c_pessoas;
 
+    //recyclerView para listar os reports da BD
+    List<Report> reports_detalhe_List;
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter rvAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+    ReportsListAdapter.ItemClickListener itemClickListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +73,15 @@ public class NotasActivity extends AppCompatActivity {
         mDbHelper = new DB(this);
         db = mDbHelper.getReadableDatabase();
 
+        reports_detalhe_List = new ArrayList<>();
+        //recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+
+        //layoutManager = new LinearLayoutManager(this);
+        //recyclerView.setLayoutManager(layoutManager);
+        //recyclerView.setHasFixedSize(true);
+        // specify an adapter (see also next example)
+        //rvAdapter = new ReportsListAdapter(this);
+        //recyclerView.setAdapter(rvAdapter);
     }
 
     public void guardar(View v){
@@ -106,12 +129,64 @@ public class NotasActivity extends AppCompatActivity {
         editlocalizacao.setText("");
     }
 
-    public void consultar(View v){
+    public void consultar2(View v){
+        //invokeWS_2(v);
         Intent i = new Intent(NotasActivity.this, Second.class);
+        //i.putExtra("reportes", reports_detalhe_List);
         startActivity(i);
         //startActivityForResult(i, REQUEST_CODE_OP_1);
     }
 
+    public void consultar(View v){
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
+        JsonArrayRequest jsObjRequest = new JsonArrayRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            for(int i = 0; i < response.length(); i++){
+                                JSONObject obj = response.getJSONObject(i);
+                                int id = obj.getInt("id");
+                                String nome = obj.getString("nome");
+                                int utilizador_id = obj.getInt("utilizador_id");
+                                String titulo = obj.getString("titulo");
+                                String descricao = obj.getString("descricao");
+                                String data = obj.getString("data");
+                                String localizacao = obj.getString("localizacao");
+                                String fotografia = obj.getString("fotografia");
+                                double latitude = obj.getDouble("latitude");
+                                double longitude = obj.getDouble("longitude");
+
+                                Report report = new Report(id, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
+                                reports_detalhe_List.add(report);
+                                //rvAdapter = new ReportsListAdapter(reports_detalhe_List, itemClickListener);
+                                //rvAdapter = new ReportsListAdapter(this, reports_detalhe_List, itemClickListener);
+                                //rvAdapter.notifyDataSetChanged();
+                                //recyclerView.setAdapter(rvAdapter);
+                            }
+                            Log.d("PONTOS", "onResponse: " + reports_detalhe_List);
+                        } catch (JSONException ex) { }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        ((TextView) findViewById(R.id.layout_linha_titulo)).setText(error.getMessage());
+                    }
+                });
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+
+        Intent i = new Intent(NotasActivity.this, Second.class);
+        //i.putExtra("reportes", (Parcelable) reports_detalhe_List);
+        startActivity(i);
+    }
+    /*
+    private void SelectOption_showReport(Report reporte) {
+        //Toast.makeText(Second.this, reporte.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(Second.this, "report_id: " + reporte.id + " || título: " + reporte.titulo, Toast.LENGTH_SHORT).show();
+    }
+    */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
