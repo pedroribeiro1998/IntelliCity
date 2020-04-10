@@ -25,9 +25,9 @@ public class CustomArrayAdapter extends ArrayAdapter<Nota> {
         if(convertView == null){
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.layout_linha, parent, false);
         }
-        ((TextView) convertView.findViewById(R.id.titulo)).setText(n.getTitulo());
-        ((TextView) convertView.findViewById(R.id.descricao)).setText(n.getDescricao());
-        ((TextView) convertView.findViewById(R.id.data)).setText(n.getData());
+        ((TextView) convertView.findViewById(R.id.layout_linha_titulo)).setText(n.getTitulo());
+        ((TextView) convertView.findViewById(R.id.layout_linha_descricao)).setText(n.getDescricao());
+        ((TextView) convertView.findViewById(R.id.layout_linha_data)).setText(n.getData());
 
         return convertView;
     }

@@ -17,9 +17,21 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.pedroribeiro.intellicity.db.Contrato;
 import com.pedroribeiro.intellicity.db.DB;
+import com.pedroribeiro.intellicity.entities.Report;
 import com.pedroribeiro.intellicity.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 public class NotasActivity extends AppCompatActivity {
 
@@ -47,7 +59,6 @@ public class NotasActivity extends AppCompatActivity {
         mDbHelper = new DB(this);
         db = mDbHelper.getReadableDatabase();
 
-        //Toast.makeText(NotasActivity.this, getResources().getString(R.string.bemvindo), Toast.LENGTH_SHORT).show();
     }
 
     public void guardar(View v){
@@ -64,15 +75,6 @@ public class NotasActivity extends AppCompatActivity {
         }else if(localizacao.equals("")){
             Toast.makeText(NotasActivity.this, "Preencha o campo localizacao", Toast.LENGTH_SHORT).show();
         }else{
-            /*
-            ContentValues cv = new ContentValues();
-            cv.put(Contrato.Notas.COLUMN_TITULO,"Linhas do piso gastas");
-            cv.put(Contrato.Notas.COLUMN_DESCRICAO,"Não se consegue ver a linha contínua");
-            cv.put(Contrato.Notas.COLUMN_DATA,"12.03.2020");
-            cv.put(Contrato.Notas.COLUMN_LOCALIZACAO,"Tregosa");
-            cv.put(Contrato.Notas.COLUMN_ID_UTILIZADOR,"1");
-            db.insert(Contrato.Notas.TABLE_NAME, null, cv);
-             */
             //refresh();
 
             Intent i = new Intent(NotasActivity.this, Second.class);
@@ -98,35 +100,14 @@ public class NotasActivity extends AppCompatActivity {
     }
 
     public void limpar(View v){
-        //EditText edittitulo = (EditText) findViewById(R.id.edittitulo);
-        //EditText editdescricao = (EditText) findViewById(R.id.editdescricao);
-        //EditText editdata = (EditText) findViewById(R.id.editdata);
-        //EditText editlocalizacao = (EditText) findViewById(R.id.editlocalizacao);
-
         edittitulo.setText("");
         editdescricao.setText("");
         editdata.setText("");
         editlocalizacao.setText("");
-
-        //TextView textotitulo = (TextView) findViewById(R.id.txttitulo);
-        //TextView textodescricao = (TextView) findViewById(R.id.txtdescricao);
-        //TextView textodata = (TextView) findViewById(R.id.txtdata);
-        //TextView textolocalizacao = (TextView) findViewById(R.id.txtlocalizacao);
     }
 
-    public void botao_xpto(View v){
-        Intent i = new Intent(NotasActivity.this, MainActivity.class);
-        startActivity(i);
-    }
-
-    public void botao2(View v){
+    public void consultar(View v){
         Intent i = new Intent(NotasActivity.this, Second.class);
-        /*
-        i.putExtra(Utils.PARAM_TITULO, edittitulo.getText().toString());
-        i.putExtra(Utils.PARAM_DESCRICAO, editdescricao.getText().toString());
-        i.putExtra(Utils.PARAM_DATA, editdata.getText().toString());
-        i.putExtra(Utils.PARAM_LOCALIZACAO, editlocalizacao.getText().toString());
-        */
         startActivity(i);
         //startActivityForResult(i, REQUEST_CODE_OP_1);
     }
@@ -178,27 +159,5 @@ public class NotasActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
-
-/*
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-
-        if(!c.isClosed()){
-            c.close();
-            c = null;
-        }
-        if(!c_pessoas.isClosed()){
-            c_pessoas.close();
-            c_pessoas = null;
-        }
-        if(db.isOpen()){
-            db.close();
-            db = null;
-        }
-    }
-
- */
 
 }

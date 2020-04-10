@@ -1,12 +1,16 @@
 package com.pedroribeiro.intellicity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,9 +28,11 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.pedroribeiro.intellicity.adapters.CustomArrayAdapter;
 import com.pedroribeiro.intellicity.adapters.MyCursorAdapter;
+import com.pedroribeiro.intellicity.adapters.ReportsListAdapter;
 import com.pedroribeiro.intellicity.db.Contrato;
 import com.pedroribeiro.intellicity.db.DB;
 import com.pedroribeiro.intellicity.entities.Nota;
+import com.pedroribeiro.intellicity.entities.Report;
 import com.pedroribeiro.intellicity.utils.Utils;
 
 import org.json.JSONArray;
@@ -34,15 +40,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 public class Second extends AppCompatActivity {
 
     ArrayList<Nota> arrayNota;
-
-    TextView edittitulo;
-    TextView editdescricao;
-    TextView editdata;
-    TextView editlocalizacao;
 
     private int REQUEST_CODE_OP_1 = 1;
 
@@ -52,6 +56,13 @@ public class Second extends AppCompatActivity {
     ListView lista;
     //SimpleCursorAdapter adapter;
     MyCursorAdapter madapter;
+
+    //recyclerView para listar os reports da BD
+    List<Report> reports_detalhe_List;
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter rvAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+    ReportsListAdapter.ItemClickListener itemClickListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,13 +75,69 @@ public class Second extends AppCompatActivity {
         //lista = (ListView) findViewById(R.id.lista);                                  //descomentar
        // preencheLista();                                                              //descomentar
 
-        //Toast.makeText(Second.this,titulo,Toast.LENGTH_SHORT).show();
-        //Toast.makeText(Second.this,descricao,Toast.LENGTH_SHORT).show();
-        //Toast.makeText(Second.this,data,Toast.LENGTH_SHORT).show();
-        //Toast.makeText(Second.this,localizacao,Toast.LENGTH_SHORT).show();
-
         //registerForContextMenu((ListView) findViewById(R.id.lista));                  //descomentar
         //arrayNota = new ArrayList<>();
+
+        reports_detalhe_List = new ArrayList<>();
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        // specify an adapter (see also next example)
+        rvAdapter = new ReportsListAdapter(this);
+        recyclerView.setAdapter(rvAdapter);
+
+        itemClickListener = ((view, position) -> {
+            Report reporte = this.reports_detalhe_List.get(position);
+            SelectOption_showReport(reporte);
+        });
+        //https://stackoverflow.com/questions/28296708/get-clicked-item-and-its-position-in-recyclerview
+    }
+
+    public void invokeWS_2(View v){
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
+        JsonArrayRequest jsObjRequest = new JsonArrayRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            for(int i = 0; i < response.length(); i++){
+                                JSONObject obj = response.getJSONObject(i);
+                                int id = obj.getInt("id");
+                                String nome = obj.getString("nome");
+                                int utilizador_id = obj.getInt("utilizador_id");
+                                String titulo = obj.getString("titulo");
+                                String descricao = obj.getString("descricao");
+                                String data = obj.getString("data");
+                                String localizacao = obj.getString("localizacao");
+                                String fotografia = obj.getString("fotografia");
+                                double latitude = obj.getDouble("latitude");
+                                double longitude = obj.getDouble("longitude");
+
+                                Report report = new Report(id, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
+                                reports_detalhe_List.add(report);
+                                rvAdapter = new ReportsListAdapter(reports_detalhe_List, itemClickListener);
+                                //rvAdapter = new ReportsListAdapter(this, reports_detalhe_List, itemClickListener);
+                                rvAdapter.notifyDataSetChanged();
+                                recyclerView.setAdapter(rvAdapter);
+                            }
+                        } catch (JSONException ex) { }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        ((TextView) findViewById(R.id.layout_linha_titulo)).setText(error.getMessage());
+                    }
+                });
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+    }
+
+    private void SelectOption_showReport(Report reporte) {
+        //Toast.makeText(Second.this, reporte.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(Second.this, "report_id: " + reporte.id + " || título: " + reporte.titulo, Toast.LENGTH_SHORT).show();
     }
 
     private void preencheLista() {
@@ -89,9 +156,10 @@ public class Second extends AppCompatActivity {
         lista.setAdapter(madapter);
 
     }
-
+//este funciona e só retorna 1 nome acho eu
+    /*
     public void invokeWS(View v){
-        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/1";
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/2"; //2 = iduser
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
@@ -110,62 +178,7 @@ public class Second extends AppCompatActivity {
                 });
         // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
-    }
-/*
-    public void invokeWS_2(View v){ //versão da professora, não funciona
-        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            ((TextView) findViewById(R.id.texto)).setText(response.getString(Utils.param_status));
-                            JSONArray arr = response.getJSONArray(Utils.param_dados);
-                            for(int i = 0; i < arr.length(); i++){
-                                JSONObject obj = arr.getJSONObject(i);
-                                Toast.makeText(Second.this, obj.getString("titulo") + "; " +
-                                        obj.getString("descricao"), Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException ex) { }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        ((TextView) findViewById(R.id.texto)).setText(error.getMessage());
-                    }
-                });
-        // Access the RequestQueue through your singleton class.
-        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }*/
-
-    public void invokeWS_2(View v){
-        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
-        JsonArrayRequest jsObjRequest = new JsonArrayRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        try {
-                            for(int i = 0; i < response.length(); i++){
-                                JSONObject obj = response.getJSONObject(i);
-                                String titulo = obj.getString("titulo");
-                                String descricao = obj.getString("descricao");
-                                ((TextView) findViewById(R.id.data)).setText(titulo);
-                                ((TextView) findViewById(R.id.texto)).setText(descricao);
-                                //guardar os dados num array e enviar para um adapter para construir uma lista?
-                            }
-                        } catch (JSONException ex) { }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        ((TextView) findViewById(R.id.texto)).setText(error.getMessage());
-                    }
-                });
-        // Access the RequestQueue through your singleton class.
-        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
-    }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuinfo) {
@@ -187,7 +200,7 @@ public class Second extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.edit:
                 updateInDB(id_nota);
-                //Toast.makeText(Second.this, " Atualizado com sucesso! ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Second.this, " Atualizado com sucesso! ", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.remove:
                 //Toast.makeText(Second.this, String.valueOf(itemPosition), Toast.LENGTH_SHORT).show();
@@ -196,7 +209,7 @@ public class Second extends AppCompatActivity {
                 //apagar da bd
                 deleteFromDB(id_nota);
                 //refresh da lista
-                //Toast.makeText(Second.this, " Removido com sucesso! ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Second.this, " Removido com sucesso! ", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -233,6 +246,7 @@ public class Second extends AppCompatActivity {
         c = db.rawQuery(sql, null);
     }
 
+    /* toolbar superior*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -267,22 +281,4 @@ public class Second extends AppCompatActivity {
         }
     }
 
-/*
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-
-        if(!c.isClosed()){
-            c.close();
-            c = null;
-        }
-        if(!c_pessoas.isClosed()){
-            c_pessoas.close();
-            c_pessoas = null;
-        }
-        if(db.isOpen()){
-            db.close();
-            db = null;
-        }
-    }*/
 }
