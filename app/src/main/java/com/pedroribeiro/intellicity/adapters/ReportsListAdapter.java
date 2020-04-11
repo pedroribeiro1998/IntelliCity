@@ -1,6 +1,7 @@
 package com.pedroribeiro.intellicity.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -22,25 +23,16 @@ import java.util.Date;
 import java.util.List;
 
 public class ReportsListAdapter extends RecyclerView.Adapter<ReportsListAdapter.MyViewHolder> {
-    private String[] mDataset;
-    private Context context;
-    //private List<Report> reports;
-    private List<Report> reports = new ArrayList<>();
-    private ItemClickListener itemClickListener;
+    Context context;
+    List<Report> reports = new ArrayList<>();
+    ItemClickListener itemClickListener;
 
-
-
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public ReportsListAdapter(String[] myDataset) {
-        mDataset = myDataset;
-    }
-
-    public ReportsListAdapter(Context context) {
+    public ReportsListAdapter(Context context, List<Report> reports) {
         this.context = context;
+        this.reports = reports;
     }
 
     public ReportsListAdapter(List<Report> reports, ItemClickListener itemClickListener) {
-        //this.context = context;
         this.reports = reports;
         this.itemClickListener = itemClickListener;
     }
@@ -55,31 +47,24 @@ public class ReportsListAdapter extends RecyclerView.Adapter<ReportsListAdapter.
     @Override
     public ReportsListAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // create a new view
-        //TextView v = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_linha, parent, false);
-        //MyViewHolder vh = new MyViewHolder(v);
-        //return vh;
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_linha, parent, false);
         return new ReportsListAdapter.MyViewHolder(view, itemClickListener);
-        //return null;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ReportsListAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        //holder.textView.setText(mDataset[position]);
-
         Report report = reports.get(position);
-
         holder.titulo.setText(report.getTitulo());
         holder.descricao.setText(report.getDescricao());
+        holder.data.setText(report.getData());
         /*
         String date = report.getData();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YYYY hh:mm");
         String String_data = sdf.format(date);
         holder.data.setText(String_data);
         */
-        holder.data.setText(report.getData());
     }
 
     @Override
@@ -96,7 +81,7 @@ public class ReportsListAdapter extends RecyclerView.Adapter<ReportsListAdapter.
         public TextView textView, titulo, descricao, data;
         ItemClickListener itemClickListener;
         CardView cardView;
-        public MyViewHolder(/*TextView v,*/ View itemView, ItemClickListener itemClickListener) {
+        public MyViewHolder(View itemView, ItemClickListener itemClickListener) {
             //super(v);
             //textView = v;
             super(itemView);
@@ -109,12 +94,6 @@ public class ReportsListAdapter extends RecyclerView.Adapter<ReportsListAdapter.
             cardView.setOnClickListener(this);
             itemView.setOnCreateContextMenuListener(this);
         }
-
-        /*public MyViewHolder(View convertView) {
-            super(convertView);
-           //... ...
-            convertView.setOnClickListener(this);
-        }*/
 
         @Override
         public void onClick(View v) {

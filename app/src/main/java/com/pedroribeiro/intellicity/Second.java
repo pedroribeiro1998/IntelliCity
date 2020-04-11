@@ -58,7 +58,6 @@ public class Second extends AppCompatActivity {
     MyCursorAdapter madapter;
 
     //recyclerView para listar os reports da BD
-    //List<Report> reports_detalhe_List = (ArrayList<Report>) getIntent().getSerializableExtra("reportes");
     List<Report> reports_detalhe_List;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter rvAdapter;
@@ -73,29 +72,23 @@ public class Second extends AppCompatActivity {
         mDbHelper = new DB(this);
         db = mDbHelper.getReadableDatabase();
 
-        //lista = (ListView) findViewById(R.id.lista);                                  //descomentar
-       // preencheLista();                                                              //descomentar
-
-        //registerForContextMenu((ListView) findViewById(R.id.lista));                  //descomentar
-        //arrayNota = new ArrayList<>();
-
-        reports_detalhe_List = new ArrayList<>();
-        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setHasFixedSize(true);
-        // specify an adapter (see also next example)
-        rvAdapter = new ReportsListAdapter(this);
-        recyclerView.setAdapter(rvAdapter);
+        reports_detalhe_List = ((List<Report>) getIntent().getExtras().getSerializable("REPORTS_LIST"));
 
         itemClickListener = ((view, position) -> {
             Report reporte = this.reports_detalhe_List.get(position);
             SelectOption_showReport(reporte);
         });
+
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        // specify an adapter (see also next example)
+        rvAdapter = new ReportsListAdapter(this, reports_detalhe_List,itemClickListener);
+        recyclerView.setAdapter(rvAdapter);
         //https://stackoverflow.com/questions/28296708/get-clicked-item-and-its-position-in-recyclerview
     }
-
+    //funcional e já não é usado
     public void invokeWS_2(View v){
         String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
         JsonArrayRequest jsObjRequest = new JsonArrayRequest
@@ -119,12 +112,13 @@ public class Second extends AppCompatActivity {
 
                                 Report report = new Report(id, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
                                 reports_detalhe_List.add(report);
+
+                            }
+                            for(int i = 0; i < reports_detalhe_List.size(); i++){
                                 rvAdapter = new ReportsListAdapter(reports_detalhe_List, itemClickListener);
-                                //rvAdapter = new ReportsListAdapter(this, reports_detalhe_List, itemClickListener);
                                 rvAdapter.notifyDataSetChanged();
                                 recyclerView.setAdapter(rvAdapter);
                             }
-                            Log.d("PONTOS", "onResponse: " + reports_detalhe_List);
                         } catch (JSONException ex) { }
                     }
                 }, new Response.ErrorListener() {
@@ -133,6 +127,7 @@ public class Second extends AppCompatActivity {
                         ((TextView) findViewById(R.id.layout_linha_titulo)).setText(error.getMessage());
                     }
                 });
+
         // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }
@@ -141,7 +136,7 @@ public class Second extends AppCompatActivity {
         //Toast.makeText(Second.this, reporte.toString(), Toast.LENGTH_SHORT).show();
         Toast.makeText(Second.this, "report_id: " + reporte.id + " || título: " + reporte.titulo, Toast.LENGTH_SHORT).show();
     }
-
+    //já não é usado
     private void preencheLista() {
         c = db.query(false, Contrato.Notas.TABLE_NAME, Contrato.Notas.PROJECTION,
                 null, null, null, null, null, null);
@@ -158,7 +153,8 @@ public class Second extends AppCompatActivity {
         lista.setAdapter(madapter);
 
     }
-//este funciona e só retorna 1 nome acho eu
+
+    //este funciona e só retorna 1 nome acho eu
     /*
     public void invokeWS(View v){
         String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/2"; //2 = iduser
