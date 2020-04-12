@@ -376,6 +376,7 @@ ImageView timg = dialog_show.findViewById(R.id.photo_show_point_dialog);
                         }
                     dialog_show.show();
 
+https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/fotox-6.jpeg
  */
 
 
