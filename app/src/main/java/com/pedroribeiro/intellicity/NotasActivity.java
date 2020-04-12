@@ -24,6 +24,7 @@ import android.os.Parcelable;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.text.Editable;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,6 +54,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -68,17 +70,13 @@ public class NotasActivity extends AppCompatActivity {
     private static final String TAG = "";
     EditText edittitulo;
     EditText editdescricao;
-    EditText editdata;
     EditText editlocalizacao;
-
-    String x,y,z;// validar botão voltar
 
     private int REQUEST_CODE_OP_1 = 1;
 
-
-    DB mDbHelper;
-    SQLiteDatabase db;
-    Cursor c, c_pessoas;
+    //DB mDbHelper;
+    //SQLiteDatabase db;
+    //Cursor c, c_pessoas;
 
     //recyclerView para listar os reports da BD
     List<Report> reports_detalhe_List;
@@ -97,11 +95,11 @@ public class NotasActivity extends AppCompatActivity {
     private static final int CAMERA_REQUEST = 1888;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
 
-    //last teste
-    //static final int REQUEST_IMAGE_CAPTURE = 1;
     private Bitmap mImageBitmap;
     private String mCurrentPhotoPath;
-    //private ImageView mImageView;
+
+    String latitude;
+    String longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,43 +108,45 @@ public class NotasActivity extends AppCompatActivity {
 
         edittitulo = (EditText) findViewById(R.id.edittitulo);
         editdescricao = (EditText) findViewById(R.id.editdescricao);
-        editdata = (EditText) findViewById(R.id.editdata);
         editlocalizacao = (EditText) findViewById(R.id.editlocalizacao);
         takePictureButton = (Button) findViewById(R.id.button_image);
         imageView = (ImageView) findViewById(R.id.imageView);
 
-        mDbHelper = new DB(this);
-        db = mDbHelper.getReadableDatabase();
+        //mDbHelper = new DB(this);
+        //db = mDbHelper.getReadableDatabase();
 
         reports_detalhe_List = new ArrayList<>();
-
-        z = getIntent().getStringExtra("z"); //VenhoDaMain
-        Button btlimparteste = (Button) findViewById(R.id.limpar);
-        if (z.equals("VenhoDaMain")){
-            //then the button is enabled.
-            btlimparteste.setVisibility(View.GONE);
-        }
-
     }
 
     // tratar da fotografia do report
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == MY_CAMERA_PERMISSION_CODE)
-        {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            {
+        if (requestCode == MY_CAMERA_PERMISSION_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(cameraIntent, CAMERA_REQUEST);
-            }
-            else
-            {
+            } else {
                 Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
             }
         }
     }
+
+    private String setPhotoBase64_bit(Bitmap bitmapm) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmapm.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+
+            byte[] byteArrayImage = baos.toByteArray();
+            String imagebase64string = Base64.encodeToString(byteArrayImage,Base64.DEFAULT);
+            return imagebase64string;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -163,7 +163,7 @@ public class NotasActivity extends AppCompatActivity {
     }
 
     public void dispatchTakePictureIntent(View view) {
-        //estas políticas foram adicionadas para isto funcionar em android versão 6 e 7
+        //estas políticas foram adicionadas antes de iniciar a camera para isto funcionar em android versão 6 e 7
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -195,7 +195,6 @@ public class NotasActivity extends AppCompatActivity {
                 ".jpg",         // suffix
                 storageDir      // directory
         );
-
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
@@ -210,25 +209,24 @@ public class NotasActivity extends AppCompatActivity {
         return true;
     }
 
-    // acabar de corrigir
-    /*
-    public void registar(View v){
-        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/registoUser";
+    // Post Request to save report on server database and create image on server directory
+    public void guardar(View v){
+        //String url = "http://localhost:8088/myslim_commov1920/api/reports/registoReport";
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/registoReport";
 
         //tenho de apanhar o ID do user logado
         int userid = 1;
         String titulo = edittitulo.getText().toString();
         String descricao = editdescricao.getText().toString();
-        //String data = editdata.getText().toString();
         String localizacao = editlocalizacao.getText().toString();
 
-        //apanhar a fotografia
-        String urlPhoto = Utils.passarURLphoto;
-        Log.d("URL", urlPhoto);
-        //latitude
-        double lat = 41.63746446;
-        //longitude
-        double lng = -8.75331402;
+
+        String fotografia = setPhotoBase64_bit(mImageBitmap);
+        //Log.d("fotografia",fotografia);
+
+        latitude = getIntent().getStringExtra("latitude");
+        longitude = getIntent().getStringExtra("longitude");
+
 
         if(isNullOrEmpty(titulo)) {
             Toast.makeText(NotasActivity.this, "Tem de preencher o titulo!", Toast.LENGTH_SHORT).show();
@@ -239,11 +237,13 @@ public class NotasActivity extends AppCompatActivity {
         }
         else {
             Map<String, String> jsonParams = new HashMap<String, String>();
-            jsonParams.put( "nome" , nome);
-            jsonParams.put( "username" , username);
-            jsonParams.put( "password" , password);
-            jsonParams.put( "data_nasc" , dt_nasc);
-            jsonParams.put( "morada" , morada);
+            jsonParams.put( "utilizador_id" , String.valueOf(userid));
+            jsonParams.put( "titulo" , titulo);
+            jsonParams.put( "descricao" , descricao);
+            jsonParams.put( "localizacao" , localizacao);
+            jsonParams.put( "fotografia" , fotografia);
+            jsonParams.put( "latitude" , String.valueOf(latitude));
+            jsonParams.put( "longitude" , String.valueOf(longitude));
 
             JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
                     new JSONObject(jsonParams),
@@ -254,6 +254,7 @@ public class NotasActivity extends AppCompatActivity {
                             try {
                                 if(response.getBoolean("status")){ //status = true ?
                                     Toast.makeText(NotasActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                    //Toast.makeText(NotasActivity.this, response.getString("data"), Toast.LENGTH_SHORT).show();
                                     Intent i = new Intent(NotasActivity.this, NotasActivity.class);
                                     startActivity(i);
                                 } else{
@@ -279,58 +280,18 @@ public class NotasActivity extends AppCompatActivity {
             // Access the RequestQueue through your singleton class.
             MySingleton.getInstance(this).addToRequestQueue(postRequest);
         }
-
-    }
-    */
-    public void guardar(View v){
-        String titulo = edittitulo.getText().toString();
-        String descricao = editdescricao.getText().toString();
-        String data = editdata.getText().toString();
-        String localizacao = editlocalizacao.getText().toString();
-        if(titulo.equals("")){
-            Toast.makeText(NotasActivity.this, "Preencha o campo titulo", Toast.LENGTH_SHORT).show();
-        }else if(descricao.equals("")){
-            Toast.makeText(NotasActivity.this, "Preencha o campo descricao", Toast.LENGTH_SHORT).show();
-        }else if(data.equals("")){
-            Toast.makeText(NotasActivity.this, "Preencha o campo data", Toast.LENGTH_SHORT).show();
-        }else if(localizacao.equals("")){
-            Toast.makeText(NotasActivity.this, "Preencha o campo localizacao", Toast.LENGTH_SHORT).show();
-        }else{
-            //refresh();
-
-            /*Intent i = new Intent(NotasActivity.this, Second.class);
-            i.putExtra(Utils.PARAM_TITULO, edittitulo.getText().toString());
-            i.putExtra(Utils.PARAM_DESCRICAO, editdescricao.getText().toString());
-            i.putExtra(Utils.PARAM_DATA, editdata.getText().toString());
-            i.putExtra(Utils.PARAM_LOCALIZACAO, editlocalizacao.getText().toString());
-
-            ContentValues cv1 = new ContentValues();
-            cv1.put(Contrato.Notas.COLUMN_TITULO, edittitulo.getText().toString());
-            cv1.put(Contrato.Notas.COLUMN_DESCRICAO, editdescricao.getText().toString());
-            cv1.put(Contrato.Notas.COLUMN_DATA, editdata.getText().toString());
-            cv1.put(Contrato.Notas.COLUMN_LOCALIZACAO, editlocalizacao.getText().toString());
-            cv1.put(Contrato.Notas.COLUMN_ID_UTILIZADOR,"1");
-            db.insert(Contrato.Notas.TABLE_NAME, null, cv1);
-            startActivityForResult(i, REQUEST_CODE_OP_1);*/
-
-            edittitulo.setText("");
-            editdescricao.setText("");
-            editdata.setText("");
-            editlocalizacao.setText("");
-        }
     }
 
-    public void limpar(View v){
+    public void backToMap(View v){
         edittitulo.setText("");
         editdescricao.setText("");
-        editdata.setText("");
         editlocalizacao.setText("");
 
         Intent i = new Intent(NotasActivity.this, MapActivity.class);
         startActivity(i);
-
     }
 
+    //a funcionar direito Post Request to list all reports
     public void consultar(View v){
         String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
         JsonArrayRequest jsObjRequest = new JsonArrayRequest
@@ -349,8 +310,8 @@ public class NotasActivity extends AppCompatActivity {
                                 String data = obj.getString("data");
                                 String localizacao = obj.getString("localizacao");
                                 String fotografia = obj.getString("fotografia");
-                                double latitude = obj.getDouble("latitude");
-                                double longitude = obj.getDouble("longitude");
+                                String latitude = obj.getString("latitude");
+                                String longitude = obj.getString("longitude");
 
                                 Report report = new Report(id, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
                                 reports_detalhe_List.add(report);
@@ -370,30 +331,14 @@ public class NotasActivity extends AppCompatActivity {
         // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }
-
+    // enviar reports_detalhe_List para mostrar na activity
     private void nextActivity(List<Report> reports_detalhe_list) {
         Intent intent = new Intent(NotasActivity.this, Second.class);
         intent.putExtra("REPORTS_LIST", (Serializable) reports_detalhe_List);
         this.startActivity(intent);
     }
 
-    /*
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Check which request we're responding to
-        if (requestCode == REQUEST_CODE_OP_1) {
-            // Make sure the request was successful
-            if (resultCode == RESULT_OK) {
-                // The user picked a contact.
-                // The Intent's data Uri identifies which contact was selected.
-                // Do something with the contact here (bigger example below)
-                Toast.makeText(NotasActivity.this, data.getStringExtra(Utils.PARAM_OUTPUT), Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-    */
-
-/* toolbar superior*/
+    /* toolbar superior*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -403,38 +348,10 @@ public class NotasActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //x = getIntent().getStringExtra("x"); //VenhoDoMap
-        //y = getIntent().getStringExtra("y"); //VenhoDaSecond
-        //z = getIntent().getStringExtra("z"); //VenhoDaMain
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.opcao1:
-                /*if (z.equals("VenhoDaMain") && x == null && y != null) {
-                    //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(NotasActivity.this, MainActivity.class);
-                    startActivity(i);
-                }
-                if (z.equals("VenhoDaMain") && x == null && y == null) {
-                    //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(NotasActivity.this, MainActivity.class);
-                    startActivity(i);
-                }
-                else if (z.equals("VenhoDaMain") && x != null && y.equals("VenhoDaSecond")) {
-                    //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(NotasActivity.this, MainActivity.class);
-                    startActivity(i);
-                }
-                else if (z == null && x.equals("VenhoDoMap") && y == null) {
-                    //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(NotasActivity.this, MapActivity.class);
-                    startActivity(i);
-                }
-                else if (z != null && x.equals("VenhoDoMap") && y.equals("VenhoDaSecond")) {
-                    //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(NotasActivity.this, MapActivity.class);
-                    startActivity(i);
-                }*/
-                //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
+                Toast.makeText(NotasActivity.this, "Sessão terminada! Obrigado.", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(NotasActivity.this, MainActivity.class);
                 startActivity(i);
                 return true;
@@ -455,5 +372,5 @@ public class NotasActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
+    /* toolbar superior*/
 }

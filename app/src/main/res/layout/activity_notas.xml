@@ -41,11 +41,6 @@
             android:layout_height="wrap_content"
             android:hint="@string/descricao" />
         <EditText
-            android:id="@+id/editdata"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/data" />
-        <EditText
             android:id="@+id/editlocalizacao"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -90,7 +85,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/limpar"
-            android:onClick="limpar"/>
+            android:onClick="backToMap"/>
 
         <Button
             android:layout_weight="1"

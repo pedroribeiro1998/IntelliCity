@@ -11,10 +11,10 @@ public class Report implements Serializable {
     public String data;
     public String localizacao;
     public String fotografia;
-    public double latitude;
-    public double longitude;
+    public String latitude;
+    public String longitude;
 
-    public Report(int id, int utilizador_id, String titulo, String descricao, String data, String localizacao, String fotografia, double latitude, double longitude){
+    public Report(int id, int utilizador_id, String titulo, String descricao, String data, String localizacao, String fotografia, String latitude, String longitude){
         this.id = id;
         this.utilizador_id = utilizador_id;
         this.titulo = titulo;
@@ -82,19 +82,19 @@ public class Report implements Serializable {
         this.fotografia = fotografia;
     }
 
-    public double getLatitude() {
+    public String getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(String latitude) {
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
+    public String getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(String longitude) {
         this.longitude = longitude;
     }
 }

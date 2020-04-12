@@ -22,66 +22,52 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.pedroribeiro.intellicity.db.Contrato;
 import com.pedroribeiro.intellicity.db.DB;
+import com.pedroribeiro.intellicity.entities.Report;
 import com.pedroribeiro.intellicity.utils.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-
-    EditText edittitulo;
-    EditText editdescricao;
-    EditText editdata;
-    EditText editlocalizacao;
-
-    TextView textotitulo;
-    TextView textodescricao;
-    TextView textodata;
-    TextView textolocalizacao;
-
     EditText editusername;
     EditText editpassword;
 
+    List<Report> reports_detalhe_List;
+
     private int REQUEST_CODE_OP_1 = 1;
 
-    DB mDbHelper;
-    SQLiteDatabase db;
-    Cursor c, c_pessoas;
+    //DB mDbHelper;
+    //SQLiteDatabase db;
+    //Cursor c, c_pessoas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        edittitulo = (EditText) findViewById(R.id.edittitulo);
-        editdescricao = (EditText) findViewById(R.id.editdescricao);
-        editdata = (EditText) findViewById(R.id.editdata);
-        editlocalizacao = (EditText) findViewById(R.id.editlocalizacao);
-
         editusername = (EditText) findViewById(R.id.username);
         editpassword = (EditText) findViewById(R.id.password);
 
-        mDbHelper = new DB(this);
-        db = mDbHelper.getReadableDatabase();
+        //mDbHelper = new DB(this);
+        //db = mDbHelper.getReadableDatabase();
 
-        //Toast.makeText(MainActivity.this, getResources().getString(R.string.bemvindo), Toast.LENGTH_SHORT).show();
+        reports_detalhe_List = new ArrayList<>();
     }
 
     public void registar_Utilizador(View view){
         Intent newActivityIntent = new Intent(this,RegistarUtilizadorActivity.class);
         startActivity(newActivityIntent);
-    }
-
-    public void verNotas(View v){
-        Intent i = new Intent(MainActivity.this, NotasActivity.class);
-        i.putExtra("z", "VenhoDaMain");
-        startActivity(i);
     }
 
     // validar input de strings
@@ -115,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onResponse(JSONObject response) {
                             try {
                                 if(response.getBoolean("status")){
+
                                     Toast.makeText(MainActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
                                     Intent i = new Intent(MainActivity.this, MapActivity.class);
                                     startActivity(i);
@@ -141,15 +128,6 @@ public class MainActivity extends AppCompatActivity {
             // Access the RequestQueue through your singleton class.
             MySingleton.getInstance(this).addToRequestQueue(postRequest);
         }
-
-
-        /*
-        i.putExtra(Utils.PARAM_TITULO, edittitulo.getText().toString());
-        i.putExtra(Utils.PARAM_DESCRICAO, editdescricao.getText().toString());
-        i.putExtra(Utils.PARAM_DATA, editdata.getText().toString());
-        i.putExtra(Utils.PARAM_LOCALIZACAO, editlocalizacao.getText().toString());
-        */
-        //startActivityForResult(i, REQUEST_CODE_OP_1);
     }
 
     @Override
@@ -165,58 +143,54 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-/* toolbar superior
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_ativ_1, menu);
-        return true;
+
+    //a funcionar direito Post Request to list all reports
+    public void consultar(View v){
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
+        JsonArrayRequest jsObjRequest = new JsonArrayRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            for(int i = 0; i < response.length(); i++){
+                                JSONObject obj = response.getJSONObject(i);
+                                int id = obj.getInt("id");
+                                String nome = obj.getString("nome");
+                                int utilizador_id = obj.getInt("utilizador_id");
+                                String titulo = obj.getString("titulo");
+                                String descricao = obj.getString("descricao");
+                                String data = obj.getString("data");
+                                String localizacao = obj.getString("localizacao");
+                                String fotografia = obj.getString("fotografia");
+                                String latitude = obj.getString("latitude");
+                                String longitude = obj.getString("longitude");
+
+                                Report report = new Report(id, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
+                                reports_detalhe_List.add(report);
+                            }
+                            nextActivity(reports_detalhe_List);
+
+                        } catch (JSONException ex) { }
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        ((TextView) findViewById(R.id.layout_linha_titulo)).setText(error.getMessage());
+                    }
+                });
+
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.opcao1:
-                Toast.makeText(MainActivity.this, "Opcao1", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.opcao2:
-                Toast.makeText(MainActivity.this, "Opcao2", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.opcao3:
-                Toast.makeText(MainActivity.this, "Opcao3", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.opcao4:
-                Toast.makeText(MainActivity.this, "Opcao4", Toast.LENGTH_SHORT).show();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+    // enviar reports_detalhe_List para mostrar na activity
+    private void nextActivity(List<Report> reports_detalhe_list) {
+        Intent intent = new Intent(MainActivity.this, SecondFromMainActivity.class);
+        intent.putExtra("REPORTS_LIST", (Serializable) reports_detalhe_List);
+        this.startActivity(intent);
     }
-
- */
-/*
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-
-        if(!c.isClosed()){
-            c.close();
-            c = null;
-        }
-        if(!c_pessoas.isClosed()){
-            c_pessoas.close();
-            c_pessoas = null;
-        }
-        if(db.isOpen()){
-            db.close();
-            db = null;
-        }
-    }
-
- */
-
 }
 
 

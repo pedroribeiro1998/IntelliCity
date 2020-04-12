@@ -19,8 +19,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -34,11 +39,19 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.pedroribeiro.intellicity.entities.Report;
 import com.pedroribeiro.intellicity.utils.Utils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
@@ -51,6 +64,8 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
     private AddressResultReceiver mResultReceiver;
     List<Geofence> mGeofenceList;
     PendingIntent mGeofencePendingIntent;
+
+    List<Report> reports_detalhe_List;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +82,9 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         // iniciar o serviço do google play
         buildGoogleApiClient();
         //createGeoFence();
+
+        reports_detalhe_List = new ArrayList<>();
+
     }
 
     public void onResult(Status status) {
@@ -166,10 +184,10 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         Toast.makeText(this,"Latitude: " + String.valueOf(latLng.latitude)
                         +  " longitude: " + String.valueOf(latLng.longitude),
                 Toast.LENGTH_SHORT).show();
-        Intent i = new Intent(this, StreetViewActivity.class);
+        /*Intent i = new Intent(this, StreetViewActivity.class);
         i.putExtra(Utils.LAT, latLng.latitude);
         i.putExtra(Utils.LONG, latLng.longitude);
-        startActivity(i);
+        startActivity(i);*/
     }
 
     @Override
@@ -187,10 +205,10 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         //startIntentService(l);
 
         Intent i = new Intent(this, NotasActivity.class);
-        //i.putExtra("x", "VenhoDoMap");
-        i.putExtra("z", "VenhoDoMap");
-        i.putExtra("latitude", latLng.latitude);
-        i.putExtra("longitude", latLng.longitude);
+        i.putExtra(Utils.LAT, latLng.latitude);
+        i.putExtra(Utils.LONG, latLng.longitude);
+        i.putExtra("latitude", String.valueOf(latLng.latitude));
+        i.putExtra("longitude", String.valueOf(latLng.longitude));
         startActivity(i);
     }
 
@@ -200,7 +218,6 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         mLocationRequest.setFastestInterval(10000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
-
 
     protected synchronized void buildGoogleApiClient() {
         // construir o cliente da api do google que será iniciado no onStart()
@@ -223,7 +240,7 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
      public void onConnected(Bundle connectionHint){
         // momento em que o serviço do google play é comectado ( depois de mGoogleApiClient.connect(); )
          startLocationUpdates();
-         startIntentCoordinatesService();
+         //startIntentCoordinatesService();
      }
 
     private void startLocationUpdates() {
@@ -248,6 +265,120 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
     }
 
 
+    public void my_reports(View view) {
+        Toast.makeText(MapActivity.this, "My Reports", Toast.LENGTH_SHORT).show();
+    }
+
+    //pedido a funcionar direito , a ideia é funcionar como uma leyer. Selecionado? mostra todos os reports em markers
+    public void all_reports(View v){
+        Toast.makeText(MapActivity.this, "All Reports", Toast.LENGTH_SHORT).show();
+
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
+        JsonArrayRequest jsObjRequest = new JsonArrayRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            for(int i = 0; i < response.length(); i++){
+                                JSONObject obj = response.getJSONObject(i);
+                                int id = obj.getInt("id");
+                                String nome = obj.getString("nome");
+                                int utilizador_id = obj.getInt("utilizador_id");
+                                String titulo = obj.getString("titulo");
+                                String descricao = obj.getString("descricao");
+                                String data = obj.getString("data");
+                                String localizacao = obj.getString("localizacao");
+                                String fotografia = obj.getString("fotografia");
+                                String latitude = obj.getString("latitude");
+                                String longitude = obj.getString("longitude");
+
+                                Report report = new Report(id, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
+                                reports_detalhe_List.add(report);
+                            }
+                            //nextActivity(reports_detalhe_List);
+
+                        } catch (JSONException ex) { }
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        ((TextView) findViewById(R.id.layout_linha_titulo)).setText(error.getMessage());
+                    }
+                });
+
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+    }
+
+    /********************************** testes para onClick mostrar os markers todos*************************************************************/
+    /*private void addImageMarker(MFBImageInfo mfbii, LatLngBounds.Builder llb) {
+        Bitmap bmap = MFBImageInfo.getRoundedCornerBitmap(mfbii.bitmapFromThumb(), Color.LTGRAY, RadiusImage, BorderImage, DimensionImageOverlay, DimensionImageOverlay, ActFlightMap.this);
+
+        Marker m;
+
+        GoogleMap map = getMap();
+        if (map != null && (m = map.addMarker(new MarkerOptions()
+                .position(mfbii.Location.getLatLng())
+                .title(mfbii.Comment)
+                .icon(BitmapDescriptorFactory.fromBitmap(bmap)))) != null) {
+            m_hmImages.put(m.getId(), mfbii);
+            if (llb != null)
+                llb.include(mfbii.Location.getLatLng());
+        }
+    }*/
+    /***********************************************************************************************/
+    /**/
+     // Adds a marker for each event with a location.
+     // @param map
+    /*private void addAllMarkers(GoogleMap map){
+        for (HabitEvent e:events){
+            if ((e.getLat()!=null && e.getLong()!=null) && (e.getLat()!=0 && e.getLong()!=0)){
+                map.addMarker(new MarkerOptions()
+                        .position(new LatLng(e.getLat(), e.getLong()))
+                        .title(e.getHabitType()));
+            }
+        }
+    }*/
+
+    /***********************************************************************************************/
+    /*private void setMarkers(GoogleMap mMap, List<Report> rep) {
+        if (mMap == null) {
+            return;
+        }
+        mMap.clear();
+        MarkerOptions options = new MarkerOptions().position(
+                new LatLng(Prefs.LastLatitude.getDouble(), Prefs.LastLongitude.getDouble()))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.current_location));
+        mMap.addMarker(options);
+        for (Restaurant restaurant : restaurants) {
+            MarkerOptions markerOptions = new MarkerOptions().position(
+                    new LatLng(restaurant.mLatitude, restaurant.mLongitude))
+                    .title(restaurant.mName)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_pin));
+            Marker marker = map.addMarker(markerOptions);
+            marker.setTag(restaurant);
+        }
+        mMap.setOnInfoWindowClickListener(mInfoWindowClickListener);
+    }*/
+
+
+   // https://www.programcreek.com/java-api-examples/?class=com.google.android.gms.maps.GoogleMap&method=addMarker
+    /********************************** testes para onClick mostrar os markers todos*************************************************************/
+
+/*
+ImageView timg = dialog_show.findViewById(R.id.photo_show_point_dialog);
+                        if(p.getImagem().trim() != "") {
+                            Picasso.with(getContext()).load(WS_Server.URL() + "upload/" + p.getImagem()).into(timg);
+                        }else{
+                            Picasso.with(getContext()).load(WS_Server.URL() + "upload/no_img.png").into(timg);
+                        }
+                    dialog_show.show();
+
+ */
+
+
     protected void startIntentService(Location location){
         Intent intent = new Intent(this, FetchAddressIntentService.class);
         intent.putExtra(Constants.RECEIVER, mResultReceiver);
@@ -262,35 +393,22 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         startService(intent);
     }
 
-    
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
+    public void onStatusChanged(String provider, int status, Bundle extras) {    }
 
     @Override
-    public void onProviderEnabled(String provider) {
-
-    }
+    public void onProviderEnabled(String provider) {    }
 
     @Override
-    public void onProviderDisabled(String provider) {
-
-    }
+    public void onProviderDisabled(String provider) {    }
 
     @Override
-    public void onConnectionSuspended(int i) {
-
-    }
+    public void onConnectionSuspended(int i) {    }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {    }
 
-    }
-
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions,
-                                           int[] grantResults){
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
         if(requestCode == 0){
             if(grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_DENIED){
                 if(requestCode == 0){
@@ -315,7 +433,7 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.opcao1:
-                //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapActivity.this, "Sessão terminada! Obrigado.", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(MapActivity.this, MainActivity.class);
                 startActivity(i);
                 return true;
@@ -348,14 +466,6 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
     protected void onResume() {
         super.onResume();
         //ativar
-    }
-
-    public void my_reports(View view) {
-        Toast.makeText(MapActivity.this, "My Reports", Toast.LENGTH_SHORT).show();
-    }
-
-    public void all_reports(View view) {
-        Toast.makeText(MapActivity.this, "All Reports", Toast.LENGTH_SHORT).show();
     }
 
     class AddressResultReceiver extends ResultReceiver{

@@ -44,7 +44,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class Second extends AppCompatActivity {
+public class SecondFromMainActivity extends AppCompatActivity {
 
     ArrayList<Nota> arrayNota;
 
@@ -67,7 +67,7 @@ public class Second extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_second);
+        setContentView(R.layout.activity_second_from_main);
 
         mDbHelper = new DB(this);
         db = mDbHelper.getReadableDatabase();
@@ -135,7 +135,7 @@ public class Second extends AppCompatActivity {
     */
     private void SelectOption_showReport(Report reporte) {
         //Toast.makeText(Second.this, reporte.toString(), Toast.LENGTH_SHORT).show();
-        Toast.makeText(Second.this, "report_id: " + reporte.id + " || título: " + reporte.titulo, Toast.LENGTH_SHORT).show();
+        Toast.makeText(SecondFromMainActivity.this, "report_id: " + reporte.id + " || título: " + reporte.titulo, Toast.LENGTH_SHORT).show();
     }
     //já não é usado
     private void preencheLista() {
@@ -150,7 +150,7 @@ public class Second extends AppCompatActivity {
                 new int[] {android.R.id.text1, android.R.id.text2},
                 SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         */
-        madapter = new MyCursorAdapter(Second.this, c);
+        madapter = new MyCursorAdapter(SecondFromMainActivity.this, c);
         lista.setAdapter(madapter);
 
     }
@@ -199,7 +199,7 @@ public class Second extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.edit:
                 updateInDB(id_nota);
-                Toast.makeText(Second.this, " Atualizado com sucesso! ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SecondFromMainActivity.this, " Atualizado com sucesso! ", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.remove:
                 //Toast.makeText(Second.this, String.valueOf(itemPosition), Toast.LENGTH_SHORT).show();
@@ -208,7 +208,7 @@ public class Second extends AppCompatActivity {
                 //apagar da bd
                 deleteFromDB(id_nota);
                 //refresh da lista
-                Toast.makeText(Second.this, " Removido com sucesso! ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SecondFromMainActivity.this, " Removido com sucesso! ", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -259,7 +259,7 @@ public class Second extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.opcao1:
                 //Toast.makeText(Second.this, "Voltar", Toast.LENGTH_SHORT).show();
-                Intent i = new Intent(Second.this, NotasActivity.class);
+                Intent i = new Intent(SecondFromMainActivity.this, MainActivity.class);
                 //i.putExtra("z", "VenhoDaMain");
                 //i.putExtra("y", "VenhoDaSecond");
                 //i.putExtra("x", "VenhoDoMap");
@@ -268,7 +268,7 @@ public class Second extends AppCompatActivity {
                 return true;
 
             case R.id.opcao2:
-                Toast.makeText(Second.this, "Sobre", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SecondFromMainActivity.this, "Sobre", Toast.LENGTH_SHORT).show();
                 return true;
                 /*
             case R.id.opcao3:
@@ -285,3 +285,4 @@ public class Second extends AppCompatActivity {
     }
 
 }
+
