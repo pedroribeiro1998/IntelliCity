@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/textotitulo"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/black"
         android:textStyle="bold"
         android:textSize="20sp"
         android:layout_centerHorizontal="true"/>
@@ -50,6 +50,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/localizacao" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center"/>
+
+        <Button
+            android:id="@+id/button_image"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="20dp"
+            android:layout_alignParentBottom="true"
+            android:onClick="dispatchTakePictureIntent"
+            android:layout_gravity="center"
+            android:text="Take a picture!"/>
+
 
         <Button
             android:layout_marginTop="30dp"

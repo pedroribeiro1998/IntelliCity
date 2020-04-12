@@ -27,13 +27,15 @@
             android:id="@+id/bt1"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:text="@string/botao2"/>
+            android:drawableLeft="@drawable/ic_my_reports"
+            android:onClick="my_reports"/>
         <Button
             android:id="@+id/bt2"
             android:layout_below="@id/bt1"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:text="@string/botao2"/>
+            android:drawableLeft="@drawable/ic_all_reports"
+            android:onClick="all_reports"/>
 
     </RelativeLayout>
 </RelativeLayout>

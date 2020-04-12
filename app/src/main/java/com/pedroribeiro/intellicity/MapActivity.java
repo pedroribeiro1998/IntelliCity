@@ -163,6 +163,9 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 
     @Override
     public void onMapClick(LatLng latLng) {
+        Toast.makeText(this,"Latitude: " + String.valueOf(latLng.latitude)
+                        +  " longitude: " + String.valueOf(latLng.longitude),
+                Toast.LENGTH_SHORT).show();
         Intent i = new Intent(this, StreetViewActivity.class);
         i.putExtra(Utils.LAT, latLng.latitude);
         i.putExtra(Utils.LONG, latLng.longitude);
@@ -186,6 +189,8 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         Intent i = new Intent(this, NotasActivity.class);
         //i.putExtra("x", "VenhoDoMap");
         i.putExtra("z", "VenhoDoMap");
+        i.putExtra("latitude", latLng.latitude);
+        i.putExtra("longitude", latLng.longitude);
         startActivity(i);
     }
 
@@ -343,6 +348,14 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
     protected void onResume() {
         super.onResume();
         //ativar
+    }
+
+    public void my_reports(View view) {
+        Toast.makeText(MapActivity.this, "My Reports", Toast.LENGTH_SHORT).show();
+    }
+
+    public void all_reports(View view) {
+        Toast.makeText(MapActivity.this, "All Reports", Toast.LENGTH_SHORT).show();
     }
 
     class AddressResultReceiver extends ResultReceiver{

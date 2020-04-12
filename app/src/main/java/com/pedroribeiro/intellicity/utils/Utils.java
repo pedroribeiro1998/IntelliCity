@@ -14,6 +14,8 @@ public class Utils {
     public static String param_status = "";
     public static String param_dados = "";
 
+    public static String passarURLphoto = "";
+
 
 
 }
