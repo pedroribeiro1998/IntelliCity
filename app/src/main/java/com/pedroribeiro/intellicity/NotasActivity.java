@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -48,6 +49,8 @@ public class NotasActivity extends AppCompatActivity {
     EditText editdata;
     EditText editlocalizacao;
 
+    String x,y,z;// validar botão voltar
+
     private int REQUEST_CODE_OP_1 = 1;
 
     DB mDbHelper;
@@ -75,6 +78,14 @@ public class NotasActivity extends AppCompatActivity {
         db = mDbHelper.getReadableDatabase();
 
         reports_detalhe_List = new ArrayList<>();
+
+        z = getIntent().getStringExtra("z"); //VenhoDaMain
+        Button btlimparteste = (Button) findViewById(R.id.limpar);
+        if (z.equals("VenhoDaMain")){
+            //then the button is enabled.
+            btlimparteste.setVisibility(View.GONE);
+        }
+
     }
 
     public void guardar(View v){
@@ -120,6 +131,10 @@ public class NotasActivity extends AppCompatActivity {
         editdescricao.setText("");
         editdata.setText("");
         editlocalizacao.setText("");
+
+        Intent i = new Intent(NotasActivity.this, MapActivity.class);
+        startActivity(i);
+
     }
 
     public void consultar(View v){
@@ -191,9 +206,37 @@ public class NotasActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //x = getIntent().getStringExtra("x"); //VenhoDoMap
+        //y = getIntent().getStringExtra("y"); //VenhoDaSecond
+        //z = getIntent().getStringExtra("z"); //VenhoDaMain
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.opcao1:
+                /*if (z.equals("VenhoDaMain") && x == null && y != null) {
+                    //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(NotasActivity.this, MainActivity.class);
+                    startActivity(i);
+                }
+                if (z.equals("VenhoDaMain") && x == null && y == null) {
+                    //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(NotasActivity.this, MainActivity.class);
+                    startActivity(i);
+                }
+                else if (z.equals("VenhoDaMain") && x != null && y.equals("VenhoDaSecond")) {
+                    //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(NotasActivity.this, MainActivity.class);
+                    startActivity(i);
+                }
+                else if (z == null && x.equals("VenhoDoMap") && y == null) {
+                    //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(NotasActivity.this, MapActivity.class);
+                    startActivity(i);
+                }
+                else if (z != null && x.equals("VenhoDoMap") && y.equals("VenhoDaSecond")) {
+                    //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(NotasActivity.this, MapActivity.class);
+                    startActivity(i);
+                }*/
                 //Toast.makeText(NotasActivity.this, "Voltar", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(NotasActivity.this, MainActivity.class);
                 startActivity(i);

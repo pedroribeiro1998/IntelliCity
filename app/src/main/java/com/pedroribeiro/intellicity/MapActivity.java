@@ -182,6 +182,11 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         l.setLongitude(latLng.longitude);
 
         //startIntentService(l);
+
+        Intent i = new Intent(this, NotasActivity.class);
+        //i.putExtra("x", "VenhoDoMap");
+        i.putExtra("z", "VenhoDoMap");
+        startActivity(i);
     }
 
     private void createLocationRequest() {

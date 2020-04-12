@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void verNotas(View v){
         Intent i = new Intent(MainActivity.this, NotasActivity.class);
+        i.putExtra("z", "VenhoDaMain");
         startActivity(i);
     }
 

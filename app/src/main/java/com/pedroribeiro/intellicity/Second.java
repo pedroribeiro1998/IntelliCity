@@ -259,6 +259,10 @@ public class Second extends AppCompatActivity {
             case R.id.opcao1:
                 //Toast.makeText(Second.this, "Voltar", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(Second.this, NotasActivity.class);
+                //i.putExtra("z", "VenhoDaMain");
+                //i.putExtra("y", "VenhoDaSecond");
+                //i.putExtra("x", "VenhoDoMap");
+                i.putExtra("z", "VenhoDaMainSecondteste");
                 startActivity(i);
                 return true;
 

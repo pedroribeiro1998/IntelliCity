@@ -37,5 +37,5 @@
     <string name="geofence_transition_notification_text">geofence_transition_notification_text</string>
     <string name="registar_user">Registar fr</string>
     <string name="registar_texto">Inserir dados pessoais fr</string>
-    <string name="dta_nascimento">Data nascimento</string>
+    <string name="dta_nascimento">Data nascimento  YYYY-MM-DD fr</string>
 </resources>
