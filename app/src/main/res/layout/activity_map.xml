@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="60dp"
         android:layout_alignParentRight="true"
         android:layout_marginRight="8dp">
 
@@ -28,12 +28,14 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:drawableLeft="@drawable/ic_my_reports"
+            android:shadowColor="#36DF3C"
             android:onClick="my_reports"/>
         <Button
             android:id="@+id/bt2"
             android:layout_below="@id/bt1"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:shadowColor="#F44336"
             android:drawableLeft="@drawable/ic_all_reports"
             android:onClick="all_reports"/>
 

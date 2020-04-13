@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Geocoder;
@@ -72,7 +73,9 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
     PendingIntent mGeofencePendingIntent;
 
     List<Report> reports_detalhe_List;
-    private List<Report> pontos; //createMarkers
+    List<Report> others_reports_detalhe_List;
+    List<Report> my_reports_detalhe_List;
+    List<Report> pontos; //createMarkers
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +94,8 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         //createGeoFence();
 
         reports_detalhe_List = new ArrayList<>();
+        others_reports_detalhe_List = new ArrayList<>();
+        my_reports_detalhe_List = new ArrayList<>();
 
     }
 
@@ -270,15 +275,12 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
+    /********************************** onClick mostrar os markers *************************************************************/
+
     public void my_reports(View view) {
         Toast.makeText(MapActivity.this, "My Reports", Toast.LENGTH_SHORT).show();
-    }
-
-    //pedido a funcionar direito , a ideia é funcionar como uma leyer. Selecionado? mostra todos os reports em markers
-    public void all_reports(View v){
-        Toast.makeText(MapActivity.this, "All Reports", Toast.LENGTH_SHORT).show();
-
-        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe";
+        int utilizador_id = 1;
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe/my/" + utilizador_id;
         JsonArrayRequest jsObjRequest = new JsonArrayRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
 
@@ -299,10 +301,10 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                                 String longitude = obj.getString("longitude");
 
                                 Report report = new Report(id, nome, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
-                                reports_detalhe_List.add(report);
+                                my_reports_detalhe_List.add(report);
                             }
                             //nextActivity(reports_detalhe_List);
-                            CreateMarkers(reports_detalhe_List);
+                            CreateMyMarkers(my_reports_detalhe_List);
 
                         } catch (JSONException ex) { }
 
@@ -317,9 +319,8 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }
-    /***********************************************************************************************/
-    //@Override
-    public void CreateMarkers(List<Report> points) {
+
+    private void CreateMyMarkers(List<Report> points) {
         Report pontos;
         this.pontos = points;
         for (Report p : points) {
@@ -328,10 +329,12 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 
             // Setting the position for the marker
             markerOptions.position(latLng);
+            //markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+
 
             // Setting the title for the marker.
             // This will be displayed on taping the marker
-            markerOptions.title(p.getTitulo());
+            // markerOptions.title(p.getTitulo());
             // Clears the previously touched position
             //map.clear();
 
@@ -347,34 +350,36 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                 public boolean onMarkerClick(Marker marker) {
                     Report p = (Report) marker.getTag();
                     if (p != null) {
-                        Dialog dialog = new Dialog(this);
+                        Dialog dialog = new Dialog(getContext());
                         dialog.setCancelable(true);
                         dialog.setContentView(R.layout.dialog_show_point);
 
                         TextView ttitle = dialog.findViewById(R.id.title_show_point_dialog);
-                        ttitle.setText(p.getTitle());
+                        ttitle.setText("Títulos: " + p.getTitulo());
 
                         TextView ttext = dialog.findViewById(R.id.text_show_point_dialog);
-                        ttext.setText(p.getDescricao());
+                        ttext.setText("Descrição: " + p.getDescricao());
 
-                        TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
+                        /*TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
                         Date date = new Date(p.getData());
                         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YYYY hh:mm");
                         String dateString = sdf.format(date);
-                        tdata.setText(dateString);
+                        tdata.setText(dateString);*/
+
+                        TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
+                        tdata.setText("Data: " + p.getData());
+
+                        TextView tusername = dialog.findViewById(R.id.username_show_point_dialog);
+                        tusername.setText("Reportado por: " + p.getNome());
 
                         ImageView timg = dialog.findViewById(R.id.photo_show_point_dialog);
+                        String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + p.getFotografia();
+                        String imageError = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/Xerror.png";
                         if (p.getFotografia().trim() != "") {
-
-                            String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + report.getFotografia();
-                            Picasso.with().load(imageUri).into(timg);
-
-
-                            Picasso.with(getContext()).load(WS_Server.URL() + "upload/" + p.getFotografia()).into(timg);
+                            Picasso.with(getContext()).load(imageUri).into(timg);
                         } else {
-                            Picasso.with(getContext()).load(WS_Server.URL() + "upload/no_img.png").into(timg);
+                            Picasso.with(getContext()).load(imageError).into(timg);
                         }
-
                         dialog.show();
                     }
                     return false;
@@ -382,72 +387,125 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
             });
         }
     }
-    /********************************** testes para onClick mostrar os markers todos*************************************************************/
-    /*private void addImageMarker(MFBImageInfo mfbii, LatLngBounds.Builder llb) {
-        Bitmap bmap = MFBImageInfo.getRoundedCornerBitmap(mfbii.bitmapFromThumb(), Color.LTGRAY, RadiusImage, BorderImage, DimensionImageOverlay, DimensionImageOverlay, ActFlightMap.this);
 
-        Marker m;
+    //pedido a funcionar direito , a ideia é funcionar como uma leyer. Selecionado? mostra todos os reports em markers
+    public void all_reports(View v){
+        Toast.makeText(MapActivity.this, "All Reports", Toast.LENGTH_SHORT).show();
+        int utilizador_id = 1;
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe/others/" + utilizador_id;;
+        JsonArrayRequest jsObjRequest = new JsonArrayRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
 
-        GoogleMap map = getMap();
-        if (map != null && (m = map.addMarker(new MarkerOptions()
-                .position(mfbii.Location.getLatLng())
-                .title(mfbii.Comment)
-                .icon(BitmapDescriptorFactory.fromBitmap(bmap)))) != null) {
-            m_hmImages.put(m.getId(), mfbii);
-            if (llb != null)
-                llb.include(mfbii.Location.getLatLng());
-        }
-    }*/
-    /***********************************************************************************************/
-    /**/
-     // Adds a marker for each event with a location.
-     // @param map
-    /*private void addAllMarkers(GoogleMap map){
-        for (HabitEvent e:events){
-            if ((e.getLat()!=null && e.getLong()!=null) && (e.getLat()!=0 && e.getLong()!=0)){
-                map.addMarker(new MarkerOptions()
-                        .position(new LatLng(e.getLat(), e.getLong()))
-                        .title(e.getHabitType()));
-            }
-        }
-    }*/
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            for(int i = 0; i < response.length(); i++){
+                                JSONObject obj = response.getJSONObject(i);
+                                int id = obj.getInt("id");
+                                String nome = obj.getString("nome");
+                                int utilizador_id = obj.getInt("utilizador_id");
+                                String titulo = obj.getString("titulo");
+                                String descricao = obj.getString("descricao");
+                                String data = obj.getString("data");
+                                String localizacao = obj.getString("localizacao");
+                                String fotografia = obj.getString("fotografia");
+                                String latitude = obj.getString("latitude");
+                                String longitude = obj.getString("longitude");
 
-    /***********************************************************************************************/
-    /*private void setMarkers(GoogleMap mMap, List<Report> rep) {
-        if (mMap == null) {
-            return;
-        }
-        mMap.clear();
-        MarkerOptions options = new MarkerOptions().position(
-                new LatLng(Prefs.LastLatitude.getDouble(), Prefs.LastLongitude.getDouble()))
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.current_location));
-        mMap.addMarker(options);
-        for (Restaurant restaurant : restaurants) {
-            MarkerOptions markerOptions = new MarkerOptions().position(
-                    new LatLng(restaurant.mLatitude, restaurant.mLongitude))
-                    .title(restaurant.mName)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_pin));
-            Marker marker = map.addMarker(markerOptions);
-            marker.setTag(restaurant);
-        }
-        mMap.setOnInfoWindowClickListener(mInfoWindowClickListener);
-    }*/
+                                Report report = new Report(id, nome, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
+                                others_reports_detalhe_List.add(report);
+                            }
+                            //nextActivity(reports_detalhe_List);
+                            CreateAllMarkers(others_reports_detalhe_List);
+
+                        } catch (JSONException ex) { }
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        ((TextView) findViewById(R.id.layout_linha_titulo)).setText(error.getMessage());
+                    }
+                });
+
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+    }
+
+    //works very fine welelele e cria dialog para mostrar os dados do marker
+    public void CreateAllMarkers(List<Report> points) {
+        Report pontos;
+        this.pontos = points;
+        for (Report p : points) {
+            LatLng latLng = new LatLng(Double.parseDouble(p.getLatitude()), Double.parseDouble(p.getLongitude()));
+            MarkerOptions markerOptions = new MarkerOptions();
+
+            // Setting the position for the marker
+            markerOptions.position(latLng);
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 
 
-   // https://www.programcreek.com/java-api-examples/?class=com.google.android.gms.maps.GoogleMap&method=addMarker
-    /********************************** testes para onClick mostrar os markers todos*************************************************************/
+            // Setting the title for the marker.
+            // This will be displayed on taping the marker
+            // markerOptions.title(p.getTitulo());
+            // Clears the previously touched position
+            //map.clear();
 
-/*
-ImageView timg = dialog_show.findViewById(R.id.photo_show_point_dialog);
-                        if(p.getImagem().trim() != "") {
-                            Picasso.with(getContext()).load(WS_Server.URL() + "upload/" + p.getImagem()).into(timg);
-                        }else{
-                            Picasso.with(getContext()).load(WS_Server.URL() + "upload/no_img.png").into(timg);
+            // Animating to the touched position
+            //map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+
+            // Placing a marker on the touched position
+            Marker m = mMap.addMarker(markerOptions);
+            m.setTag(p);
+
+            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    Report p = (Report) marker.getTag();
+                    if (p != null) {
+                        Dialog dialog = new Dialog(getContext());
+                        dialog.setCancelable(true);
+                        dialog.setContentView(R.layout.dialog_show_point);
+
+                        TextView ttitle = dialog.findViewById(R.id.title_show_point_dialog);
+                        ttitle.setText("Títulos: " + p.getTitulo());
+
+                        TextView ttext = dialog.findViewById(R.id.text_show_point_dialog);
+                        ttext.setText("Descrição: " + p.getDescricao());
+
+                        /*TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
+                        Date date = new Date(p.getData());
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YYYY hh:mm");
+                        String dateString = sdf.format(date);
+                        tdata.setText(dateString);*/
+
+                        TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
+                        tdata.setText("Data: " + p.getData());
+
+                        TextView tusername = dialog.findViewById(R.id.username_show_point_dialog);
+                        tusername.setText("Reportado por: " + p.getNome());
+
+                        ImageView timg = dialog.findViewById(R.id.photo_show_point_dialog);
+                        String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + p.getFotografia();
+                        String imageError = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/Xerror.png";
+                        if (p.getFotografia().trim() != "") {
+                            Picasso.with(getContext()).load(imageUri).into(timg);
+                        } else {
+                            Picasso.with(getContext()).load(imageError).into(timg);
                         }
-                    dialog_show.show();
+                        dialog.show();
+                    }
+                    return false;
+                }
+            });
+        }
+    }
 
-https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/fotox-6.jpeg
- */
+    private Context getContext() {
+        return this;
+    }
+
+    /********************************** onClick mostrar os markers *************************************************************/
 
 
     protected void startIntentService(Location location){
