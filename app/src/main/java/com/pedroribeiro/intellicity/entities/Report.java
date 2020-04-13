@@ -5,6 +5,7 @@ import java.util.Date;
 
 public class Report implements Serializable {
     public int id;
+    public String nome;
     public int utilizador_id;
     public String titulo;
     public String descricao;
@@ -14,8 +15,9 @@ public class Report implements Serializable {
     public String latitude;
     public String longitude;
 
-    public Report(int id, int utilizador_id, String titulo, String descricao, String data, String localizacao, String fotografia, String latitude, String longitude){
+    public Report(int id, String nome, int utilizador_id, String titulo, String descricao, String data, String localizacao, String fotografia, String latitude, String longitude){
         this.id = id;
+        this.nome = nome;
         this.utilizador_id = utilizador_id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -32,6 +34,14 @@ public class Report implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
     public int getUtilizador_id() {

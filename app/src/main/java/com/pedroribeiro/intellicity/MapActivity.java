@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,16 +44,20 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.pedroribeiro.intellicity.entities.Report;
 import com.pedroribeiro.intellicity.utils.Utils;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
@@ -66,6 +72,7 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
     PendingIntent mGeofencePendingIntent;
 
     List<Report> reports_detalhe_List;
+    private List<Report> pontos; //createMarkers
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -256,14 +263,12 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         }
     }
 
-
     @Override
     public void onLocationChanged(Location location) {
         //aqui podemos gravar para a bd, centrar mapa nesse ponto, etc
         Toast.makeText(this, "gps recebido -> lat: " + location.getLatitude() + " || long: " + location.getLongitude(), Toast.LENGTH_SHORT).show();
         //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
-
 
     public void my_reports(View view) {
         Toast.makeText(MapActivity.this, "My Reports", Toast.LENGTH_SHORT).show();
@@ -293,10 +298,11 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                                 String latitude = obj.getString("latitude");
                                 String longitude = obj.getString("longitude");
 
-                                Report report = new Report(id, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
+                                Report report = new Report(id, nome, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
                                 reports_detalhe_List.add(report);
                             }
                             //nextActivity(reports_detalhe_List);
+                            CreateMarkers(reports_detalhe_List);
 
                         } catch (JSONException ex) { }
 
@@ -311,6 +317,7 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }
+    /***********************************************************************************************/
 
     /********************************** testes para onClick mostrar os markers todos*************************************************************/
     /*private void addImageMarker(MFBImageInfo mfbii, LatLngBounds.Builder llb) {

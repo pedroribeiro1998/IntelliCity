@@ -313,7 +313,7 @@ public class NotasActivity extends AppCompatActivity {
                                 String latitude = obj.getString("latitude");
                                 String longitude = obj.getString("longitude");
 
-                                Report report = new Report(id, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
+                                Report report = new Report(id, nome, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
                                 reports_detalhe_List.add(report);
                             }
                             nextActivity(reports_detalhe_List);

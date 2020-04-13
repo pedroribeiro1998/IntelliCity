@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.pedroribeiro.intellicity.entities.Report;
 import com.pedroribeiro.intellicity.R;
+import com.squareup.picasso.Picasso;
 
 
 import java.text.SimpleDateFormat;
@@ -59,6 +61,10 @@ public class ReportsListAdapter extends RecyclerView.Adapter<ReportsListAdapter.
         holder.titulo.setText(report.getTitulo());
         holder.descricao.setText(report.getDescricao());
         holder.data.setText(report.getData());
+        holder.username.setText(report.getNome());
+        String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + report.getFotografia();
+        Picasso.with(context).load(imageUri).into(holder.imageview);
+
         /*
         String date = report.getData();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YYYY hh:mm");
@@ -78,9 +84,10 @@ public class ReportsListAdapter extends RecyclerView.Adapter<ReportsListAdapter.
     // you provide access to all the views for a data item in a view holder
     public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnCreateContextMenuListener {
         // each data item is just a string in this case
-        public TextView textView, titulo, descricao, data;
+        public TextView textView, titulo, descricao, data, username;
         ItemClickListener itemClickListener;
         CardView cardView;
+        ImageView imageview;
         public MyViewHolder(View itemView, ItemClickListener itemClickListener) {
             //super(v);
             //textView = v;
@@ -89,6 +96,8 @@ public class ReportsListAdapter extends RecyclerView.Adapter<ReportsListAdapter.
             descricao = itemView.findViewById(R.id.layout_linha_descricao);
             data = itemView.findViewById(R.id.layout_linha_data);
             cardView = itemView.findViewById(R.id.layout_linha_card_view);
+            imageview = itemView.findViewById(R.id.layout_linha_imageview);
+            username = itemView.findViewById(R.id.layout_linha_user);
 
             this.itemClickListener = itemClickListener;
             cardView.setOnClickListener(this);

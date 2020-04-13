@@ -36,16 +36,33 @@
                 android:text="descricao"
                 android:layout_marginTop="20dp"
                 android:layout_marginLeft="20dp"
-                android:layout_marginBottom="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
             </TextView>
             <TextView
                 android:id="@+id/layout_linha_data"
-                android:layout_alignParentRight="true"
+                android:layout_below="@id/layout_linha_titulo"
                 android:text="data"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="20dp"
+                android:layout_marginTop="50dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            </TextView>
+            <ImageView
+                android:id="@+id/layout_linha_imageview"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_alignParentRight="true"
+                android:layout_margin="20dp">
+            </ImageView>
+            <TextView
+                android:id="@+id/layout_linha_user"
+                android:layout_below="@id/layout_linha_data"
+                android:text="username"
+                android:layout_marginTop="2dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
             </TextView>
