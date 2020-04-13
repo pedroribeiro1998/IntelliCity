@@ -318,7 +318,70 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }
     /***********************************************************************************************/
+    //@Override
+    public void CreateMarkers(List<Report> points) {
+        Report pontos;
+        this.pontos = points;
+        for (Report p : points) {
+            LatLng latLng = new LatLng(Double.parseDouble(p.getLatitude()), Double.parseDouble(p.getLongitude()));
+            MarkerOptions markerOptions = new MarkerOptions();
 
+            // Setting the position for the marker
+            markerOptions.position(latLng);
+
+            // Setting the title for the marker.
+            // This will be displayed on taping the marker
+            markerOptions.title(p.getTitulo());
+            // Clears the previously touched position
+            //map.clear();
+
+            // Animating to the touched position
+            //map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+
+            // Placing a marker on the touched position
+            Marker m = mMap.addMarker(markerOptions);
+            m.setTag(p);
+
+            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    Report p = (Report) marker.getTag();
+                    if (p != null) {
+                        Dialog dialog = new Dialog(this);
+                        dialog.setCancelable(true);
+                        dialog.setContentView(R.layout.dialog_show_point);
+
+                        TextView ttitle = dialog.findViewById(R.id.title_show_point_dialog);
+                        ttitle.setText(p.getTitle());
+
+                        TextView ttext = dialog.findViewById(R.id.text_show_point_dialog);
+                        ttext.setText(p.getDescricao());
+
+                        TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
+                        Date date = new Date(p.getData());
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YYYY hh:mm");
+                        String dateString = sdf.format(date);
+                        tdata.setText(dateString);
+
+                        ImageView timg = dialog.findViewById(R.id.photo_show_point_dialog);
+                        if (p.getFotografia().trim() != "") {
+
+                            String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + report.getFotografia();
+                            Picasso.with().load(imageUri).into(timg);
+
+
+                            Picasso.with(getContext()).load(WS_Server.URL() + "upload/" + p.getFotografia()).into(timg);
+                        } else {
+                            Picasso.with(getContext()).load(WS_Server.URL() + "upload/no_img.png").into(timg);
+                        }
+
+                        dialog.show();
+                    }
+                    return false;
+                }
+            });
+        }
+    }
     /********************************** testes para onClick mostrar os markers todos*************************************************************/
     /*private void addImageMarker(MFBImageInfo mfbii, LatLngBounds.Builder llb) {
         Bitmap bmap = MFBImageInfo.getRoundedCornerBitmap(mfbii.bitmapFromThumb(), Color.LTGRAY, RadiusImage, BorderImage, DimensionImageOverlay, DimensionImageOverlay, ActFlightMap.this);
