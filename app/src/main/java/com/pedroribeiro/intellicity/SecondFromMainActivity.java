@@ -137,6 +137,7 @@ public class SecondFromMainActivity extends AppCompatActivity {
         //Toast.makeText(Second.this, reporte.toString(), Toast.LENGTH_SHORT).show();
         Toast.makeText(SecondFromMainActivity.this, "report_id: " + reporte.id + " || título: " + reporte.titulo, Toast.LENGTH_SHORT).show();
     }
+
     //já não é usado
     private void preencheLista() {
         c = db.query(false, Contrato.Notas.TABLE_NAME, Contrato.Notas.PROJECTION,

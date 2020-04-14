@@ -2,19 +2,10 @@ package com.pedroribeiro.intellicity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.text.Editable;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,9 +15,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.pedroribeiro.intellicity.db.Contrato;
-import com.pedroribeiro.intellicity.db.DB;
+import com.google.gson.Gson;
 import com.pedroribeiro.intellicity.entities.Report;
+import com.pedroribeiro.intellicity.entities.Utilizador;
 import com.pedroribeiro.intellicity.utils.Utils;
 
 import org.json.JSONArray;
@@ -44,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     EditText editpassword;
 
     List<Report> reports_detalhe_List;
+    List<Utilizador> logged_user_List;
 
     private int REQUEST_CODE_OP_1 = 1;
 
@@ -63,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         //db = mDbHelper.getReadableDatabase();
 
         reports_detalhe_List = new ArrayList<>();
+        logged_user_List = new ArrayList<>();
     }
 
     public void registar_Utilizador(View view){
@@ -101,13 +94,15 @@ public class MainActivity extends AppCompatActivity {
                         public void onResponse(JSONObject response) {
                             try {
                                 if(response.getBoolean("status")){
-
+                                    String jsondata = response.getString("data");
+                                    Gson gson = new Gson();
+                                    Utilizador utilizador = gson.fromJson(jsondata, Utilizador.class);
+                                    logged_user_List.add(utilizador);
                                     Toast.makeText(MainActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
-                                    Intent i = new Intent(MainActivity.this, MapActivity.class);
-                                    startActivity(i);
                                 } else{
                                     Toast.makeText(MainActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
                                 }
+                                nextActivity_Main_to_Map(logged_user_List);
                             } catch (JSONException ex) { }
                         }
                     },
@@ -128,6 +123,13 @@ public class MainActivity extends AppCompatActivity {
             // Access the RequestQueue through your singleton class.
             MySingleton.getInstance(this).addToRequestQueue(postRequest);
         }
+    }
+
+    // enviar reports_detalhe_List para mostrar na activity
+    private void nextActivity_Main_to_Map(List<Utilizador> logged_user_List) {
+        Intent intent = new Intent(MainActivity.this, MapActivity.class);
+        intent.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
+        this.startActivity(intent);
     }
 
     @Override
@@ -169,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                                 Report report = new Report(id, nome, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
                                 reports_detalhe_List.add(report);
                             }
-                            nextActivity(reports_detalhe_List);
+                            nextActivity_Main_to_Second(reports_detalhe_List);
 
                         } catch (JSONException ex) { }
 
@@ -186,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // enviar reports_detalhe_List para mostrar na activity
-    private void nextActivity(List<Report> reports_detalhe_list) {
+    private void nextActivity_Main_to_Second(List<Report> reports_detalhe_list) {
         Intent intent = new Intent(MainActivity.this, SecondFromMainActivity.class);
         intent.putExtra("REPORTS_LIST", (Serializable) reports_detalhe_List);
         this.startActivity(intent);

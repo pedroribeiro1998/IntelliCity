@@ -51,6 +51,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.pedroribeiro.intellicity.entities.Report;
+import com.pedroribeiro.intellicity.entities.Utilizador;
 import com.pedroribeiro.intellicity.utils.Utils;
 import com.squareup.picasso.Picasso;
 
@@ -58,6 +59,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +84,8 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
     List<Marker> markerListOthers;
     List<Marker> markerListMy;
 
+    List<Utilizador> logged_user_List;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +109,10 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 
         markerListOthers = new ArrayList<Marker>();
         markerListMy = new ArrayList<Marker>();
+
+        //logged_user_List = new ArrayList<>();
+        logged_user_List = ((List<Utilizador>) getIntent().getExtras().getSerializable("UTILIZADOR_LIST"));
+
 
     }
 
@@ -213,11 +221,10 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        Toast.makeText(this,"Latitude: " + String.valueOf(latLng.latitude)
-                                        +  " longitude: " + String.valueOf(latLng.longitude),
-                                        Toast.LENGTH_SHORT).show();
-        mMap.addMarker(new MarkerOptions()
-                            .position(latLng));
+        //logged_user_List = ((List<Utilizador>) getIntent().getExtras().getSerializable("UTILIZADOR_LIST"));
+
+        //Toast.makeText(this,"Latitude: " + String.valueOf(latLng.latitude)+  " longitude: " + String.valueOf(latLng.longitude),Toast.LENGTH_SHORT).show();
+        mMap.addMarker(new MarkerOptions().position(latLng));
 
         Location l = new Location("");
         l.setLatitude(latLng.latitude);
@@ -230,6 +237,7 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         i.putExtra(Utils.LONG, latLng.longitude);
         i.putExtra("latitude", String.valueOf(latLng.latitude));
         i.putExtra("longitude", String.valueOf(latLng.longitude));
+        i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
         startActivity(i);
     }
 
@@ -288,8 +296,14 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 
     public void my_reports(View view) {
         Toast.makeText(MapActivity.this, "My Reports", Toast.LENGTH_SHORT).show();
-        int utilizador_id = 1;
-        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe/my/" + utilizador_id;
+        //logged_user_List = ((List<Utilizador>) getIntent().getExtras().getSerializable("UTILIZADOR_LIST"));
+
+        Utilizador us = logged_user_List.get(0);
+        String nome = us.nome;
+        int id = us.id;
+        String username = us.username;
+
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe/my/" + id;
         JsonArrayRequest jsObjRequest = new JsonArrayRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
 
@@ -421,6 +435,7 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                                                     if(response.getBoolean("status")){
                                                         Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
                                                         Intent i = new Intent(MapActivity.this, MapActivity.class);
+                                                        i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
                                                         startActivity(i);
                                                     } else{
                                                         Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
@@ -489,6 +504,7 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 
                                                             Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
                                                             Intent i = new Intent(MapActivity.this, MapActivity.class);
+                                                            i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
                                                             startActivity(i);
                                                         } else{
                                                             Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
@@ -534,11 +550,16 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         return true;
     }
 
-    //pedido a funcionar direito , a ideia é funcionar como uma leyer. Selecionado? mostra todos os reports em markers
     public void all_reports(View v){
         Toast.makeText(MapActivity.this, "All Reports", Toast.LENGTH_SHORT).show();
-        int utilizador_id = 1;
-        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe/others/" + utilizador_id;;
+        //logged_user_List = ((List<Utilizador>) getIntent().getExtras().getSerializable("UTILIZADOR_LIST"));
+
+        Utilizador us = logged_user_List.get(0);
+        String nome = us.nome;
+        int id = us.id;
+        String username = us.username;
+
+        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports_detalhe/others/" + id;;
         JsonArrayRequest jsObjRequest = new JsonArrayRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
 

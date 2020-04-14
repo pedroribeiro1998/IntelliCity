@@ -33,12 +33,14 @@ import com.pedroribeiro.intellicity.db.Contrato;
 import com.pedroribeiro.intellicity.db.DB;
 import com.pedroribeiro.intellicity.entities.Nota;
 import com.pedroribeiro.intellicity.entities.Report;
+import com.pedroribeiro.intellicity.entities.Utilizador;
 import com.pedroribeiro.intellicity.utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +66,8 @@ public class Second extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
     ReportsListAdapter.ItemClickListener itemClickListener;
 
+    List<Utilizador> logged_user_List;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +77,8 @@ public class Second extends AppCompatActivity {
         db = mDbHelper.getReadableDatabase();
 
         reports_detalhe_List = ((List<Report>) getIntent().getExtras().getSerializable("REPORTS_LIST"));
+        logged_user_List = ((List<Utilizador>) getIntent().getExtras().getSerializable("UTILIZADOR_LIST"));
+
 
         itemClickListener = ((view, position) -> {
             Report reporte = this.reports_detalhe_List.get(position);
@@ -260,10 +266,7 @@ public class Second extends AppCompatActivity {
             case R.id.opcao1:
                 //Toast.makeText(Second.this, "Voltar", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(Second.this, NotasActivity.class);
-                //i.putExtra("z", "VenhoDaMain");
-                //i.putExtra("y", "VenhoDaSecond");
-                //i.putExtra("x", "VenhoDoMap");
-                i.putExtra("z", "VenhoDaMainSecondteste");
+                i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
                 startActivity(i);
                 return true;
 

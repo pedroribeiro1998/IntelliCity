@@ -45,6 +45,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/localizacao" />
+        <EditText
+            android:id="@+id/editcoordenadas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="Coordenada: "
+            android:hint="coordenadas" />
 
         <ImageView
             android:id="@+id/imageView"

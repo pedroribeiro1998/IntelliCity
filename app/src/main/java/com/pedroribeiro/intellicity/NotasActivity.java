@@ -48,6 +48,7 @@ import com.pedroribeiro.intellicity.adapters.ReportsListAdapter;
 import com.pedroribeiro.intellicity.db.Contrato;
 import com.pedroribeiro.intellicity.db.DB;
 import com.pedroribeiro.intellicity.entities.Report;
+import com.pedroribeiro.intellicity.entities.Utilizador;
 import com.pedroribeiro.intellicity.utils.Utils;
 
 import org.json.JSONArray;
@@ -71,6 +72,7 @@ public class NotasActivity extends AppCompatActivity {
     EditText edittitulo;
     EditText editdescricao;
     EditText editlocalizacao;
+    EditText editcoordenadas;
 
     private int REQUEST_CODE_OP_1 = 1;
 
@@ -98,8 +100,10 @@ public class NotasActivity extends AppCompatActivity {
     private Bitmap mImageBitmap;
     private String mCurrentPhotoPath;
 
-    String latitude;
-    String longitude;
+    String latitude = "0";
+    String longitude = "0";
+
+    List<Utilizador> logged_user_List;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,11 +115,18 @@ public class NotasActivity extends AppCompatActivity {
         editlocalizacao = (EditText) findViewById(R.id.editlocalizacao);
         takePictureButton = (Button) findViewById(R.id.button_image);
         imageView = (ImageView) findViewById(R.id.imageView);
+        editcoordenadas = (EditText) findViewById(R.id.editcoordenadas);
+
+        latitude = getIntent().getStringExtra("latitude");
+        longitude = getIntent().getStringExtra("longitude");
+        String coordinates = latitude + " | " + longitude;
+        editcoordenadas.setText(coordinates);
 
         //mDbHelper = new DB(this);
         //db = mDbHelper.getReadableDatabase();
 
         reports_detalhe_List = new ArrayList<>();
+        logged_user_List = ((List<Utilizador>) getIntent().getExtras().getSerializable("UTILIZADOR_LIST"));
     }
 
     // tratar da fotografia do report
@@ -146,7 +157,6 @@ public class NotasActivity extends AppCompatActivity {
         }
         return "";
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -214,8 +224,10 @@ public class NotasActivity extends AppCompatActivity {
         //String url = "http://localhost:8088/myslim_commov1920/api/reports/registoReport";
         String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/registoReport";
 
-        //tenho de apanhar o ID do user logado
-        int userid = 1;
+        //logged_user_List = ((List<Utilizador>) getIntent().getExtras().getSerializable("UTILIZADOR_LIST"));
+        Utilizador us = logged_user_List.get(0);
+        int id = us.id;
+
         String titulo = edittitulo.getText().toString();
         String descricao = editdescricao.getText().toString();
         String localizacao = editlocalizacao.getText().toString();
@@ -234,10 +246,11 @@ public class NotasActivity extends AppCompatActivity {
             Toast.makeText(NotasActivity.this, "Tem de preencher o descricao!", Toast.LENGTH_SHORT).show();
         }else if(isNullOrEmpty(localizacao)) {
             Toast.makeText(NotasActivity.this, "Tem de preencher a localizacao!", Toast.LENGTH_SHORT).show();
-        }
-        else {
+        }else if(isNullOrEmpty(fotografia)) {
+            Toast.makeText(NotasActivity.this, "Tem de tirar uma fotografia!", Toast.LENGTH_SHORT).show();
+        }else {
             Map<String, String> jsonParams = new HashMap<String, String>();
-            jsonParams.put( "utilizador_id" , String.valueOf(userid));
+            jsonParams.put( "utilizador_id" , String.valueOf(id));
             jsonParams.put( "titulo" , titulo);
             jsonParams.put( "descricao" , descricao);
             jsonParams.put( "localizacao" , localizacao);
@@ -255,7 +268,8 @@ public class NotasActivity extends AppCompatActivity {
                                 if(response.getBoolean("status")){ //status = true ?
                                     Toast.makeText(NotasActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
                                     //Toast.makeText(NotasActivity.this, response.getString("data"), Toast.LENGTH_SHORT).show();
-                                    Intent i = new Intent(NotasActivity.this, NotasActivity.class);
+                                    Intent i = new Intent(NotasActivity.this, MapActivity.class);
+                                    i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
                                     startActivity(i);
                                 } else{
                                     Toast.makeText(NotasActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
@@ -283,11 +297,14 @@ public class NotasActivity extends AppCompatActivity {
     }
 
     public void backToMap(View v){
+        //logged_user_List = ((List<Utilizador>) getIntent().getExtras().getSerializable("UTILIZADOR_LIST"));
+
         edittitulo.setText("");
         editdescricao.setText("");
         editlocalizacao.setText("");
 
         Intent i = new Intent(NotasActivity.this, MapActivity.class);
+        i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
         startActivity(i);
     }
 
@@ -331,10 +348,12 @@ public class NotasActivity extends AppCompatActivity {
         // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }
+
     // enviar reports_detalhe_List para mostrar na activity
     private void nextActivity(List<Report> reports_detalhe_list) {
         Intent intent = new Intent(NotasActivity.this, Second.class);
         intent.putExtra("REPORTS_LIST", (Serializable) reports_detalhe_List);
+        intent.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
         this.startActivity(intent);
     }
 
