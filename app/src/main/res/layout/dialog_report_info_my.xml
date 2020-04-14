@@ -15,7 +15,7 @@
             android:id="@+id/ttt_show_point_dialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="REPORT"
+            android:text="MY REPORT"
             android:textColor="@color/Blue"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"
             android:layout_marginTop="20dp"

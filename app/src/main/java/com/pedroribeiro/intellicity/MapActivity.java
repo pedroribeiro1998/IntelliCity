@@ -116,6 +116,7 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 
     }
 
+
     public void onResult(Status status) {
         if(status.isSuccess()){
             // Update state and save in shared preferences
@@ -196,6 +197,210 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 
         //map.moveCamera(CameraUpdateFactory.newLatLngZoom(home,18));
         focusMapa(home);
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+
+            public boolean onMarkerClick(Marker marker) {
+                Report p = (Report) marker.getTag();
+
+                boolean isMine = false;
+
+                for(Marker m : markerListMy){
+                    if(m.getTitle().equals(marker.getTitle())){
+                        isMine = true;
+                    }
+                }
+                if(isMine){
+                    Dialog dialog_my = new Dialog(getContext());
+                    dialog_my.setCancelable(true);
+
+                    dialog_my.setContentView(R.layout.dialog_report_info_my);
+                    dialog_my.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+                    Button gravar_alteracao_show_point_dialog = dialog_my.findViewById(R.id.gravar_alteracao_show_point_dialog);
+                    Button updateReport = dialog_my.findViewById(R.id.updateReport);
+                    Button deleteReport = dialog_my.findViewById(R.id.deleteReport);
+
+                    EditText ttitle = dialog_my.findViewById(R.id.title_show_point_dialog);
+                    ttitle.setText(p.getTitulo());
+
+                    EditText tdescricao = dialog_my.findViewById(R.id.text_show_point_dialog);
+                    tdescricao.setText(p.getDescricao());
+
+                    EditText tlocalizacao = dialog_my.findViewById(R.id.localizacao_show_point_dialog);
+                    tlocalizacao.setText(p.getLocalizacao());
+
+                    TextView tdata = dialog_my.findViewById(R.id.data_show_point_dialog);
+                    tdata.setText(p.getData());
+
+                    TextView tusername = dialog_my.findViewById(R.id.username_show_point_dialog);
+                    tusername.setText("Reportado por: " + p.getNome());
+
+                    ImageView timg = dialog_my.findViewById(R.id.photo_show_point_dialog);
+                    String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + p.getFotografia();
+                    String imageError = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/Xerror.png";
+                    if (p.getFotografia().trim() != "") {
+                        Picasso.with(getContext()).load(imageUri).into(timg);
+                    } else {
+                        Picasso.with(getContext()).load(imageError).into(timg);
+                    }
+
+                    int id_do_report = p.getId();
+
+                    deleteReport.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/deleteReport/" + id_do_report;
+
+                            JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+                                    new JSONObject(),
+                                    new Response.Listener<JSONObject>() {
+                                        @Override
+                                        public void onResponse(JSONObject response) {
+                                            try {
+                                                if (response.getBoolean("status")) {
+                                                    Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                                    Intent i = new Intent(MapActivity.this, MapActivity.class);
+                                                    i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
+                                                    startActivity(i);
+                                                } else {
+                                                    Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                                }
+                                            } catch (JSONException ex) {
+                                            }
+                                        }
+                                    },
+                                    new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+                                            Toast.makeText(MapActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    }) {
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError {
+                                    HashMap<String, String> headers = new HashMap<String, String>();
+                                    headers.put("Content-Type", "application/json; charset=utf-8");
+                                    headers.put("User-agent", System.getProperty("http.agent"));
+                                    return headers;
+                                }
+                            };
+                            // Access the RequestQueue through your singleton class.
+                            MySingleton.getInstance(getContext()).addToRequestQueue(postRequest);
+                        }
+                    });
+
+                    updateReport.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ttitle.setEnabled(true);
+                            tdescricao.setEnabled(true);
+                            tlocalizacao.setEnabled(true);
+                            gravar_alteracao_show_point_dialog.setVisibility(View.VISIBLE);
+                        }
+                    });
+
+                    gravar_alteracao_show_point_dialog.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/updateReport/" + id_do_report;
+
+                            String tituloUpdated = ttitle.getText().toString();
+                            String descricaoUpdated = tdescricao.getText().toString();
+                            String localizacaoUpdated = tlocalizacao.getText().toString();
+
+                            if (isNullOrEmpty(tituloUpdated)) {
+                                Toast.makeText(MapActivity.this, "Tem de preencher o título!", Toast.LENGTH_SHORT).show();
+                            } else if (isNullOrEmpty(descricaoUpdated)) {
+                                Toast.makeText(MapActivity.this, "Tem de preencher a descrição!", Toast.LENGTH_SHORT).show();
+                            } else if (isNullOrEmpty(localizacaoUpdated)) {
+                                Toast.makeText(MapActivity.this, "Tem de preencher a localização!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Map<String, String> jsonParams = new HashMap<String, String>();
+                                jsonParams.put("titulo", tituloUpdated);
+                                jsonParams.put("descricao", descricaoUpdated);
+                                jsonParams.put("localizacao", localizacaoUpdated);
+
+                                JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+                                        new JSONObject(jsonParams),
+                                        new Response.Listener<JSONObject>() {
+
+                                            @Override
+                                            public void onResponse(JSONObject response) {
+                                                try {
+                                                    if (response.getBoolean("status")) {
+
+                                                        Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                                        Intent i = new Intent(MapActivity.this, MapActivity.class);
+                                                        i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
+                                                        startActivity(i);
+                                                    } else {
+                                                        Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                                    }
+                                                } catch (JSONException ex) {
+                                                }
+                                            }
+                                        },
+                                        new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+                                                Toast.makeText(MapActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        }) {
+                                    @Override
+                                    public Map<String, String> getHeaders() throws AuthFailureError {
+                                        HashMap<String, String> headers = new HashMap<String, String>();
+                                        headers.put("Content-Type", "application/json; charset=utf-8");
+                                        headers.put("User-agent", System.getProperty("http.agent"));
+                                        return headers;
+                                    }
+                                };
+                                // Access the RequestQueue through your singleton class.
+                                MySingleton.getInstance(getContext()).addToRequestQueue(postRequest);
+                                ttitle.setEnabled(false);
+                                tdescricao.setEnabled(false);
+                                tlocalizacao.setEnabled(false);
+                                gravar_alteracao_show_point_dialog.setVisibility(View.GONE);
+                            }
+                        }
+                    });
+                    dialog_my.show();
+                }else {
+                    if (p != null) {
+                        Dialog dialog_others = new Dialog(getContext());
+                        dialog_others.setCancelable(true);
+                        dialog_others.setContentView(R.layout.dialog_report_info_others);
+                        dialog_others.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+                        EditText ttitle = dialog_others.findViewById(R.id.title_show_point_dialog);
+                        ttitle.setText(p.getTitulo());
+
+                        EditText tdescricao = dialog_others.findViewById(R.id.text_show_point_dialog);
+                        tdescricao.setText(p.getDescricao());
+
+                        EditText tlocalizacao = dialog_others.findViewById(R.id.localizacao_show_point_dialog);
+                        tlocalizacao.setText(p.getLocalizacao());
+
+                        TextView tdata = dialog_others.findViewById(R.id.data_show_point_dialog);
+                        tdata.setText(p.getData());
+
+                        TextView tusername = dialog_others.findViewById(R.id.username_show_point_dialog);
+                        tusername.setText("Reportado por: " + p.getNome());
+
+                        ImageView timg = dialog_others.findViewById(R.id.photo_show_point_dialog);
+                        String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + p.getFotografia();
+                        String imageError = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/Xerror.png";
+                        if (p.getFotografia().trim() != "") {
+                            Picasso.with(getContext()).load(imageUri).into(timg);
+                        } else {
+                            Picasso.with(getContext()).load(imageError).into(timg);
+                        }
+                        dialog_others.show();
+
+                    }
+                }
+                return false;
+            }
+        });
     }
 
     private void focusMapa(LatLng latLng){
@@ -381,135 +586,68 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
             Marker m = mMap.addMarker(markerOptions_my);
             m.setTag(p);
             markerListMy.add(m);
-            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            /*mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                 @Override
                 public boolean onMarkerClick(Marker marker) {
                     Report p = (Report) marker.getTag();
                     if (p != null) {
-                        Dialog dialog = new Dialog(getContext());
-                        dialog.setCancelable(true);
-                        dialog.setContentView(R.layout.dialog_report_info_my);
-                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        Dialog dialog_my = new Dialog(getContext());
+                        dialog_my.setCancelable(true);
 
-                        Button gravar_alteracao_show_point_dialog = dialog.findViewById(R.id.gravar_alteracao_show_point_dialog);
-                        Button updateReport = dialog.findViewById(R.id.updateReport);
-                        Button deleteReport = dialog.findViewById(R.id.deleteReport);
+                            dialog_my.setContentView(R.layout.dialog_report_info_my);
+                            dialog_my.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-                        EditText ttitle = dialog.findViewById(R.id.title_show_point_dialog);
-                        ttitle.setText(p.getTitulo());
+                            Button gravar_alteracao_show_point_dialog = dialog_my.findViewById(R.id.gravar_alteracao_show_point_dialog);
+                            Button updateReport = dialog_my.findViewById(R.id.updateReport);
+                            Button deleteReport = dialog_my.findViewById(R.id.deleteReport);
 
-                        EditText tdescricao = dialog.findViewById(R.id.text_show_point_dialog);
-                        tdescricao.setText(p.getDescricao());
+                            EditText ttitle = dialog_my.findViewById(R.id.title_show_point_dialog);
+                            ttitle.setText(p.getTitulo());
 
-                        EditText tlocalizacao = dialog.findViewById(R.id.localizacao_show_point_dialog);
-                        tlocalizacao.setText(p.getLocalizacao());
+                            EditText tdescricao = dialog_my.findViewById(R.id.text_show_point_dialog);
+                            tdescricao.setText(p.getDescricao());
 
-                        TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
-                        tdata.setText(p.getData());
+                            EditText tlocalizacao = dialog_my.findViewById(R.id.localizacao_show_point_dialog);
+                            tlocalizacao.setText(p.getLocalizacao());
 
-                        TextView tusername = dialog.findViewById(R.id.username_show_point_dialog);
-                        tusername.setText("Reportado por: " + p.getNome());
+                            TextView tdata = dialog_my.findViewById(R.id.data_show_point_dialog);
+                            tdata.setText(p.getData());
 
-                        ImageView timg = dialog.findViewById(R.id.photo_show_point_dialog);
-                        String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + p.getFotografia();
-                        String imageError = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/Xerror.png";
-                        if (p.getFotografia().trim() != "") {
-                            Picasso.with(getContext()).load(imageUri).into(timg);
-                        } else {
-                            Picasso.with(getContext()).load(imageError).into(timg);
-                        }
+                            TextView tusername = dialog_my.findViewById(R.id.username_show_point_dialog);
+                            tusername.setText("Reportado por: " + p.getNome());
 
-                        int id_do_report = p.getId();
-
-                        deleteReport.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/deleteReport/" + id_do_report;
-
-                                JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
-                                        new JSONObject(),
-                                        new Response.Listener<JSONObject>() {
-                                            @Override
-                                            public void onResponse(JSONObject response) {
-                                                try {
-                                                    if(response.getBoolean("status")){
-                                                        Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
-                                                        Intent i = new Intent(MapActivity.this, MapActivity.class);
-                                                        i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
-                                                        startActivity(i);
-                                                    } else{
-                                                        Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
-                                                    }
-                                                } catch (JSONException ex) { }
-                                            }
-                                        },
-                                        new Response.ErrorListener() {
-                                            @Override
-                                            public void onErrorResponse(VolleyError error) {
-                                                Toast.makeText(MapActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-                                            }
-                                        }) {
-                                    @Override
-                                    public Map<String, String> getHeaders() throws AuthFailureError {
-                                        HashMap<String, String> headers = new HashMap<String, String>();
-                                        headers.put("Content-Type", "application/json; charset=utf-8");
-                                        headers.put("User-agent", System.getProperty("http.agent"));
-                                        return headers;
-                                    }
-                                };
-                                // Access the RequestQueue through your singleton class.
-                                MySingleton.getInstance(getContext()).addToRequestQueue(postRequest);
+                            ImageView timg = dialog_my.findViewById(R.id.photo_show_point_dialog);
+                            String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + p.getFotografia();
+                            String imageError = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/Xerror.png";
+                            if (p.getFotografia().trim() != "") {
+                                Picasso.with(getContext()).load(imageUri).into(timg);
+                            } else {
+                                Picasso.with(getContext()).load(imageError).into(timg);
                             }
-                        });
 
-                        updateReport.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                ttitle.setEnabled(true);
-                                tdescricao.setEnabled(true);
-                                tlocalizacao.setEnabled(true);
-                                gravar_alteracao_show_point_dialog.setVisibility(View.VISIBLE);
-                            }
-                        });
+                            int id_do_report = p.getId();
 
-                        gravar_alteracao_show_point_dialog.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/updateReport/" + id_do_report;
-
-                                String tituloUpdated = ttitle.getText().toString();
-                                String descricaoUpdated = tdescricao.getText().toString();
-                                String localizacaoUpdated = tlocalizacao.getText().toString();
-
-                                if(isNullOrEmpty(tituloUpdated)) {
-                                    Toast.makeText(MapActivity.this, "Tem de preencher o título!", Toast.LENGTH_SHORT).show();
-                                }else if(isNullOrEmpty(descricaoUpdated)) {
-                                    Toast.makeText(MapActivity.this, "Tem de preencher a descrição!", Toast.LENGTH_SHORT).show();
-                                }else if(isNullOrEmpty(localizacaoUpdated)) {
-                                    Toast.makeText(MapActivity.this, "Tem de preencher a localização!", Toast.LENGTH_SHORT).show();
-                                }else{
-                                    Map<String, String> jsonParams = new HashMap<String, String>();
-                                    jsonParams.put( "titulo" , tituloUpdated);
-                                    jsonParams.put( "descricao" , descricaoUpdated);
-                                    jsonParams.put( "localizacao" , localizacaoUpdated);
+                            deleteReport.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/deleteReport/" + id_do_report;
 
                                     JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
-                                            new JSONObject(jsonParams),
+                                            new JSONObject(),
                                             new Response.Listener<JSONObject>() {
-
                                                 @Override
                                                 public void onResponse(JSONObject response) {
                                                     try {
-                                                        if(response.getBoolean("status")){
-
+                                                        if (response.getBoolean("status")) {
                                                             Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
                                                             Intent i = new Intent(MapActivity.this, MapActivity.class);
                                                             i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
                                                             startActivity(i);
-                                                        } else{
+                                                        } else {
                                                             Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
                                                         }
-                                                    } catch (JSONException ex) { }
+                                                    } catch (JSONException ex) {
+                                                    }
                                                 }
                                             },
                                             new Response.ErrorListener() {
@@ -519,7 +657,7 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                                                 }
                                             }) {
                                         @Override
-                                        public Map<String, String> getHeaders() throws AuthFailureError{
+                                        public Map<String, String> getHeaders() throws AuthFailureError {
                                             HashMap<String, String> headers = new HashMap<String, String>();
                                             headers.put("Content-Type", "application/json; charset=utf-8");
                                             headers.put("User-agent", System.getProperty("http.agent"));
@@ -528,18 +666,89 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                                     };
                                     // Access the RequestQueue through your singleton class.
                                     MySingleton.getInstance(getContext()).addToRequestQueue(postRequest);
-                                    ttitle.setEnabled(false);
-                                    tdescricao.setEnabled(false);
-                                    tlocalizacao.setEnabled(false);
-                                    gravar_alteracao_show_point_dialog.setVisibility(View.GONE);
                                 }
-                            }
-                        });
-                        dialog.show();
-                    }
+                            });
+
+                            updateReport.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    ttitle.setEnabled(true);
+                                    tdescricao.setEnabled(true);
+                                    tlocalizacao.setEnabled(true);
+                                    gravar_alteracao_show_point_dialog.setVisibility(View.VISIBLE);
+                                }
+                            });
+
+                            gravar_alteracao_show_point_dialog.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/updateReport/" + id_do_report;
+
+                                    String tituloUpdated = ttitle.getText().toString();
+                                    String descricaoUpdated = tdescricao.getText().toString();
+                                    String localizacaoUpdated = tlocalizacao.getText().toString();
+
+                                    if (isNullOrEmpty(tituloUpdated)) {
+                                        Toast.makeText(MapActivity.this, "Tem de preencher o título!", Toast.LENGTH_SHORT).show();
+                                    } else if (isNullOrEmpty(descricaoUpdated)) {
+                                        Toast.makeText(MapActivity.this, "Tem de preencher a descrição!", Toast.LENGTH_SHORT).show();
+                                    } else if (isNullOrEmpty(localizacaoUpdated)) {
+                                        Toast.makeText(MapActivity.this, "Tem de preencher a localização!", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Map<String, String> jsonParams = new HashMap<String, String>();
+                                        jsonParams.put("titulo", tituloUpdated);
+                                        jsonParams.put("descricao", descricaoUpdated);
+                                        jsonParams.put("localizacao", localizacaoUpdated);
+
+                                        JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+                                                new JSONObject(jsonParams),
+                                                new Response.Listener<JSONObject>() {
+
+                                                    @Override
+                                                    public void onResponse(JSONObject response) {
+                                                        try {
+                                                            if (response.getBoolean("status")) {
+
+                                                                Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                                                Intent i = new Intent(MapActivity.this, MapActivity.class);
+                                                                i.putExtra("UTILIZADOR_LIST", (Serializable) logged_user_List);
+                                                                startActivity(i);
+                                                            } else {
+                                                                Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        } catch (JSONException ex) {
+                                                        }
+                                                    }
+                                                },
+                                                new Response.ErrorListener() {
+                                                    @Override
+                                                    public void onErrorResponse(VolleyError error) {
+                                                        Toast.makeText(MapActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }) {
+                                            @Override
+                                            public Map<String, String> getHeaders() throws AuthFailureError {
+                                                HashMap<String, String> headers = new HashMap<String, String>();
+                                                headers.put("Content-Type", "application/json; charset=utf-8");
+                                                headers.put("User-agent", System.getProperty("http.agent"));
+                                                return headers;
+                                            }
+                                        };
+                                        // Access the RequestQueue through your singleton class.
+                                        MySingleton.getInstance(getContext()).addToRequestQueue(postRequest);
+                                        ttitle.setEnabled(false);
+                                        tdescricao.setEnabled(false);
+                                        tlocalizacao.setEnabled(false);
+                                        gravar_alteracao_show_point_dialog.setVisibility(View.GONE);
+                                    }
+                                }
+                            });
+                            dialog_my.show();
+
+
                     return false;
                 }
-            });
+            });*/
         }
     }
 
@@ -638,47 +847,11 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
             Marker m = mMap.addMarker(markerOptions_others);
             m.setTag(p);
             markerListOthers.add(m);
-            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                @Override
-                public boolean onMarkerClick(Marker marker) {
-                    Report p = (Report) marker.getTag();
-                    if (p != null) {
-                        Dialog dialog = new Dialog(getContext());
-                        dialog.setCancelable(true);
-                        dialog.setContentView(R.layout.dialog_report_info_others);
-                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-                        EditText ttitle = dialog.findViewById(R.id.title_show_point_dialog);
-                        ttitle.setText(p.getTitulo());
-
-                        EditText tdescricao = dialog.findViewById(R.id.text_show_point_dialog);
-                        tdescricao.setText(p.getDescricao());
-
-                        EditText tlocalizacao = dialog.findViewById(R.id.localizacao_show_point_dialog);
-                        tlocalizacao.setText(p.getLocalizacao());
-
-                        TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
-                        tdata.setText(p.getData());
-
-                        TextView tusername = dialog.findViewById(R.id.username_show_point_dialog);
-                        tusername.setText("Reportado por: " + p.getNome());
-
-                        ImageView timg = dialog.findViewById(R.id.photo_show_point_dialog);
-                        String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + p.getFotografia();
-                        String imageError = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/Xerror.png";
-                        if (p.getFotografia().trim() != "") {
-                            Picasso.with(getContext()).load(imageUri).into(timg);
-                        } else {
-                            Picasso.with(getContext()).load(imageError).into(timg);
-                        }
-                        dialog.show();
-
-                    }
-                    return false;
-                }
-            });
         }
     }
+
+
 
     private Context getContext() {
         return this;
