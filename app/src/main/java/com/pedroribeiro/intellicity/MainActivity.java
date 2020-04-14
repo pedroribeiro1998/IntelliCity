@@ -1,10 +1,9 @@
 package com.pedroribeiro.intellicity;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +16,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 import com.pedroribeiro.intellicity.entities.Report;
 import com.pedroribeiro.intellicity.entities.Utilizador;
@@ -38,7 +38,16 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.google.gson.reflect.TypeToken;
+//import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Type;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static final String key = "aesEncryptionKey";
+    private static final String initVector = "encryptionIntVec";
+
     EditText editusername;
     EditText editpassword;
 
@@ -79,8 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
     // após login terá de ir para a página do mapa
     public void login(View v){
-        String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/loginUser";
-        String username2 = editusername.getText().toString();
+        //String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/loginUser";
         String username = editusername.getText().toString();
         String password = editpassword.getText().toString();
 
@@ -90,10 +98,22 @@ public class MainActivity extends AppCompatActivity {
         }else if(isNullOrEmpty(password)) {
             Toast.makeText(MainActivity.this, "Tem de preencher a password!", Toast.LENGTH_SHORT).show();
         }else{
+            //String username_enc = encrypt(username);
+            //String password_enc = encrypt(password);
+
             Map<String, String> jsonParams = new HashMap<String, String>();
+            //jsonParams.put( "username" , username_enc);
+            //jsonParams.put( "password" , password_enc);
             jsonParams.put( "username" , username);
             jsonParams.put( "password" , password);
 
+            //Gson gson = new Gson();
+            //Type gsonType = new TypeToken<HashMap>(){}.getType();
+            //String gsonString = gson.toJson(jsonParams,gsonType);
+            String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/loginUser";
+
+
+            /***************************************************************************************/
             JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
                     new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
@@ -197,17 +217,19 @@ public class MainActivity extends AppCompatActivity {
 
     // enviar reports_detalhe_List para mostrar na activity
     private void nextActivity_Main_to_Second(List<Report> reports_detalhe_list) {
-        Intent intent = new Intent(MainActivity.this, SecondFromMainActivity.class);
-        intent.putExtra("REPORTS_LIST", (Serializable) reports_detalhe_List);
-        this.startActivity(intent);
+        //Intent intent = new Intent(MainActivity.this, SecondFromMainActivity.class);
+        //intent.putExtra("REPORTS_LIST", (Serializable) reports_detalhe_List);
+        //this.startActivity(intent);
+        String welele = "String que estou a testar para a encriptação e desencriptação. vamos ver como corre";
+        encrypt(welele);
+
     }
 
     /***********************************Encriptar e Desencriptar**********************************************/
-/*
-    private static final String key = "aesEncryptionKey";
-    private static final String initVector = "encryptionIntVec";
+
 
     public static String encrypt(String value) {
+        Log.d("encrypt_value_inicial",value);
         try {
             IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
@@ -217,30 +239,36 @@ public class MainActivity extends AppCompatActivity {
 
             byte[] encrypted = cipher.doFinal(value.getBytes());
 
-            //String base64 = Base64.encodeToString(encrypted, Base64.NO_WRAP);     estou aqui
-            return Base64.encodeBase64String(encrypted);
+            String base64 = Base64.encodeToString(encrypted, Base64.NO_WRAP);
+            //return Base64.encodeBase64String(encrypted);
+            Log.d("encrypt_value_final",base64);
+            //decrypt(base64);
+            return base64;
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         return null;
     }
 
-    public static String decrypt(String encrypted) {
+    public static void decrypt(String encrypted) {
+        Log.d("decrypt_value_inicial",encrypted);
         try {
             IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
-            byte[] original = cipher.doFinal(Base64.decodeBase64(encrypted));
+            //byte[] original = cipher.doFinal(Base64.decodeBase64(encrypted));
+            byte[] original2 = cipher.doFinal(Base64.decode(encrypted,Base64.DEFAULT));
 
-            return new String(original);
+
+            Log.d("decrypt_value_inicial", new String(original2));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
 
-        return null;
-    }*/
+
     /***********************************Encriptar e Desencriptar**********************************************/
 
 
