@@ -1,13 +1,15 @@
 package com.pedroribeiro.intellicity;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -47,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         editusername = (EditText) findViewById(R.id.username);
         editpassword = (EditText) findViewById(R.id.password);
 
@@ -73,9 +74,10 @@ public class MainActivity extends AppCompatActivity {
     // após login terá de ir para a página do mapa
     public void login(View v){
         String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/loginUser";
-
+        String username2 = editusername.getText().toString();
         String username = editusername.getText().toString();
         String password = editpassword.getText().toString();
+
 
         if(isNullOrEmpty(username)) {
             Toast.makeText(MainActivity.this, "Tem de preencher o username!", Toast.LENGTH_SHORT).show();

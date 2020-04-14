@@ -63,7 +63,8 @@
             android:layout_marginTop="30dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/registar_user"
+            android:text="Registar"
+            android:background="@drawable/mybutton"
             android:onClick="registar"/>
 
     </LinearLayout>

@@ -16,12 +16,12 @@
 
     <style name="Button">
         <item name="android:textColor">@color/White</item>
-        <item name="android:padding">2dp</item>
+        <item name="android:padding">1dp</item>
         <item name="android:minWidth">88dp</item>
         <item name="android:minHeight">36dp</item>
         <item name="android:elevation">2dp</item>
         <item name="android:translationZ">1dp</item>
-        <item name="android:backgroundTint">@color/Grey</item>
+        <item name="android:backgroundTint">@color/colorPrimaryDark</item>
 
     </style>
 </resources>

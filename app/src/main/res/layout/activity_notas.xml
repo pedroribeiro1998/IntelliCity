@@ -66,19 +66,21 @@
 
         <Button style="@style/Button"
             android:id="@+id/button_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginTop="30dp"
             android:layout_alignParentBottom="true"
             android:onClick="dispatchTakePictureIntent"
             android:layout_gravity="center"
-            android:text="Tirar fotografia"/>
+            android:background="@drawable/mybutton"
+            android:text="  Tirar fotografia  "/>
 
 
         <Button style="@style/Button"
             android:layout_marginTop="30dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/mybutton"
             android:text="@string/guardar"
             android:onClick="guardar"/>
 
@@ -95,13 +97,16 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/mybutton"
             android:text="@string/limpar"
             android:onClick="backToMap"/>
 
         <Button style="@style/Button"
             android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/mybutton"
             android:text="@string/botao2"
             android:onClick="consultar"/>
 

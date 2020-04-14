@@ -1,14 +1,18 @@
 package com.pedroribeiro.intellicity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -17,6 +21,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +41,7 @@ import com.pedroribeiro.intellicity.entities.Nota;
 import com.pedroribeiro.intellicity.entities.Report;
 import com.pedroribeiro.intellicity.entities.Utilizador;
 import com.pedroribeiro.intellicity.utils.Utils;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,6 +75,8 @@ public class Second extends AppCompatActivity {
 
     List<Utilizador> logged_user_List;
 
+    CardView layout_linha_card_view;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,7 +91,39 @@ public class Second extends AppCompatActivity {
 
         itemClickListener = ((view, position) -> {
             Report reporte = this.reports_detalhe_List.get(position);
-            SelectOption_showReport(reporte);
+
+            if (reporte != null) {
+                Dialog dialog = new Dialog(getContext());
+                dialog.setCancelable(true);
+                dialog.setContentView(R.layout.dialog_report_info_others);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+                EditText ttitle = dialog.findViewById(R.id.title_show_point_dialog);
+                ttitle.setText(reporte.getTitulo());
+
+                EditText tdescricao = dialog.findViewById(R.id.text_show_point_dialog);
+                tdescricao.setText(reporte.getDescricao());
+
+                EditText tlocalizacao = dialog.findViewById(R.id.localizacao_show_point_dialog);
+                tlocalizacao.setText(reporte.getLocalizacao());
+
+                TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
+                tdata.setText(reporte.getData());
+
+                TextView tusername = dialog.findViewById(R.id.username_show_point_dialog);
+                tusername.setText("Reportado por: " + reporte.getNome());
+
+                ImageView timg = dialog.findViewById(R.id.photo_show_point_dialog);
+                String imageUri = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/" + reporte.getFotografia();
+                String imageError = "https://intellicity.000webhostapp.com/myslim_commov1920/report_photos/Xerror.png";
+                if (reporte.getFotografia().trim() != "") {
+                    Picasso.with(getContext()).load(imageUri).into(timg);
+                } else {
+                    Picasso.with(getContext()).load(imageError).into(timg);
+                }
+                dialog.show();
+
+            }
         });
 
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -93,6 +134,8 @@ public class Second extends AppCompatActivity {
         rvAdapter = new ReportsListAdapter(this, reports_detalhe_List,itemClickListener);
         recyclerView.setAdapter(rvAdapter);
         //https://stackoverflow.com/questions/28296708/get-clicked-item-and-its-position-in-recyclerview
+
+        layout_linha_card_view = findViewById(R.id.layout_linha_card_view);
     }
     //funcional e já não é usado
     /*
@@ -139,10 +182,12 @@ public class Second extends AppCompatActivity {
         MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
     }
     */
-    private void SelectOption_showReport(Report reporte) {
-        //Toast.makeText(Second.this, reporte.toString(), Toast.LENGTH_SHORT).show();
-        Toast.makeText(Second.this, "report_id: " + reporte.id + " || título: " + reporte.titulo, Toast.LENGTH_SHORT).show();
+
+
+    private Context getContext() {
+        return this;
     }
+
     //já não é usado
     private void preencheLista() {
         c = db.query(false, Contrato.Notas.TABLE_NAME, Contrato.Notas.PROJECTION,
