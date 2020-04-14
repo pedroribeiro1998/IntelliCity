@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/textotitulo"
-        android:textColor="@color/black"
+        android:textColor="@color/Blue"
         android:textStyle="bold"
         android:textSize="20sp"
         android:layout_centerHorizontal="true"/>
@@ -51,20 +51,24 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="20dp"
+            android:padding="8dp"
+            android:scaleType="centerCrop"
+            android:cropToPadding="true"
+            android:background="@drawable/border_image"
             android:layout_gravity="center"/>
 
-        <Button
+        <Button style="@style/Button"
             android:id="@+id/button_image"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
             android:layout_alignParentBottom="true"
             android:onClick="dispatchTakePictureIntent"
             android:layout_gravity="center"
-            android:text="Take a picture!"/>
+            android:text="Tirar fotografia"/>
 
 
-        <Button
+        <Button style="@style/Button"
             android:layout_marginTop="30dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -79,7 +83,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <Button
+        <Button style="@style/Button"
             android:id="@+id/limpar"
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -87,7 +91,7 @@
             android:text="@string/limpar"
             android:onClick="backToMap"/>
 
-        <Button
+        <Button style="@style/Button"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

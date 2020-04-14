@@ -25,6 +25,7 @@
                 android:textStyle="bold"
                 android:textSize="20dp"
                 android:text="titulo"
+                android:textColor="@color/Blue"
                 android:layout_marginTop="20dp"
                 android:layout_marginLeft="20dp"
                 android:layout_width="wrap_content"
@@ -54,6 +55,10 @@
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_alignParentRight="true"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:cropToPadding="true"
+                android:background="@drawable/border_image"
                 android:layout_margin="20dp">
             </ImageView>
             <TextView

@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/textotitulo"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/Blue"
         android:textStyle="bold"
         android:textSize="20sp"
         android:layout_centerHorizontal="true"/>
@@ -58,26 +58,26 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <Button
+        <Button style="@style/Button"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/guardar"
             android:onClick="guardar"/>
 
-        <Button
+        <Button style="@style/Button"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/limpar"
-            android:onClick="limpar"/>
+            android:onClick="backToMap"/>
 
-        <Button
+        <Button style="@style/Button"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/botao2"
-            android:onClick="botao2"/>
+            android:onClick="consultar"/>
 
     </LinearLayout>
 </RelativeLayout>

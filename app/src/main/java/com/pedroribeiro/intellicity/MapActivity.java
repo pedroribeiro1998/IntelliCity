@@ -1,7 +1,6 @@
 package com.pedroribeiro.intellicity;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -11,7 +10,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Geocoder;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
@@ -21,20 +21,23 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -55,11 +58,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
 GoogleMap.OnMapLongClickListener, LocationListener, GoogleApiClient.ConnectionCallbacks,
@@ -76,6 +78,10 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
     List<Report> others_reports_detalhe_List;
     List<Report> my_reports_detalhe_List;
     List<Report> pontos; //createMarkers
+
+    List<Marker> markerListOthers;
+    List<Marker> markerListMy;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +102,9 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         reports_detalhe_List = new ArrayList<>();
         others_reports_detalhe_List = new ArrayList<>();
         my_reports_detalhe_List = new ArrayList<>();
+
+        markerListOthers = new ArrayList<Marker>();
+        markerListMy = new ArrayList<Marker>();
 
     }
 
@@ -287,24 +296,37 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                     @Override
                     public void onResponse(JSONArray response) {
                         try {
-                            for(int i = 0; i < response.length(); i++){
-                                JSONObject obj = response.getJSONObject(i);
-                                int id = obj.getInt("id");
-                                String nome = obj.getString("nome");
-                                int utilizador_id = obj.getInt("utilizador_id");
-                                String titulo = obj.getString("titulo");
-                                String descricao = obj.getString("descricao");
-                                String data = obj.getString("data");
-                                String localizacao = obj.getString("localizacao");
-                                String fotografia = obj.getString("fotografia");
-                                String latitude = obj.getString("latitude");
-                                String longitude = obj.getString("longitude");
+                            if(my_reports_detalhe_List.size()==0) {
+                                for (int i = 0; i < response.length(); i++) {
+                                    JSONObject obj = response.getJSONObject(i);
+                                    int id = obj.getInt("id");
+                                    String nome = obj.getString("nome");
+                                    int utilizador_id = obj.getInt("utilizador_id");
+                                    String titulo = obj.getString("titulo");
+                                    String descricao = obj.getString("descricao");
+                                    String data = obj.getString("data");
+                                    String localizacao = obj.getString("localizacao");
+                                    String fotografia = obj.getString("fotografia");
+                                    String latitude = obj.getString("latitude");
+                                    String longitude = obj.getString("longitude");
 
-                                Report report = new Report(id, nome, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
-                                my_reports_detalhe_List.add(report);
+                                    Report report = new Report(id, nome, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
+                                    my_reports_detalhe_List.add(report);
+                                }
+                                CreateMyMarkers(my_reports_detalhe_List);
+
+                            }else{
+                                for (Marker m : markerListMy) {
+                                    for(Report p : my_reports_detalhe_List){
+                                        if(m.getTitle().equals(p.titulo)){
+                                            m.remove();
+                                        }
+                                    }
+                                }
+                                my_reports_detalhe_List.removeAll(my_reports_detalhe_List);
                             }
+
                             //nextActivity(reports_detalhe_List);
-                            CreateMyMarkers(my_reports_detalhe_List);
 
                         } catch (JSONException ex) { }
 
@@ -325,26 +347,26 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
         this.pontos = points;
         for (Report p : points) {
             LatLng latLng = new LatLng(Double.parseDouble(p.getLatitude()), Double.parseDouble(p.getLongitude()));
-            MarkerOptions markerOptions = new MarkerOptions();
+            MarkerOptions markerOptions_my = new MarkerOptions();
 
             // Setting the position for the marker
-            markerOptions.position(latLng);
+            markerOptions_my.position(latLng);
             //markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 
 
             // Setting the title for the marker.
             // This will be displayed on taping the marker
-            // markerOptions.title(p.getTitulo());
+            markerOptions_my.title(p.getTitulo());
             // Clears the previously touched position
             //map.clear();
 
             // Animating to the touched position
-            //map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
 
             // Placing a marker on the touched position
-            Marker m = mMap.addMarker(markerOptions);
+            Marker m = mMap.addMarker(markerOptions_my);
             m.setTag(p);
-
+            markerListMy.add(m);
             mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                 @Override
                 public boolean onMarkerClick(Marker marker) {
@@ -352,22 +374,24 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                     if (p != null) {
                         Dialog dialog = new Dialog(getContext());
                         dialog.setCancelable(true);
-                        dialog.setContentView(R.layout.dialog_show_point);
+                        dialog.setContentView(R.layout.dialog_report_info_my);
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-                        TextView ttitle = dialog.findViewById(R.id.title_show_point_dialog);
-                        ttitle.setText("Títulos: " + p.getTitulo());
+                        Button gravar_alteracao_show_point_dialog = dialog.findViewById(R.id.gravar_alteracao_show_point_dialog);
+                        Button updateReport = dialog.findViewById(R.id.updateReport);
+                        Button deleteReport = dialog.findViewById(R.id.deleteReport);
 
-                        TextView ttext = dialog.findViewById(R.id.text_show_point_dialog);
-                        ttext.setText("Descrição: " + p.getDescricao());
+                        EditText ttitle = dialog.findViewById(R.id.title_show_point_dialog);
+                        ttitle.setText(p.getTitulo());
 
-                        /*TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
-                        Date date = new Date(p.getData());
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YYYY hh:mm");
-                        String dateString = sdf.format(date);
-                        tdata.setText(dateString);*/
+                        EditText tdescricao = dialog.findViewById(R.id.text_show_point_dialog);
+                        tdescricao.setText(p.getDescricao());
+
+                        EditText tlocalizacao = dialog.findViewById(R.id.localizacao_show_point_dialog);
+                        tlocalizacao.setText(p.getLocalizacao());
 
                         TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
-                        tdata.setText("Data: " + p.getData());
+                        tdata.setText(p.getData());
 
                         TextView tusername = dialog.findViewById(R.id.username_show_point_dialog);
                         tusername.setText("Reportado por: " + p.getNome());
@@ -380,12 +404,134 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                         } else {
                             Picasso.with(getContext()).load(imageError).into(timg);
                         }
+
+                        int id_do_report = p.getId();
+
+                        deleteReport.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/deleteReport/" + id_do_report;
+
+                                JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+                                        new JSONObject(),
+                                        new Response.Listener<JSONObject>() {
+                                            @Override
+                                            public void onResponse(JSONObject response) {
+                                                try {
+                                                    if(response.getBoolean("status")){
+                                                        Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                                        Intent i = new Intent(MapActivity.this, MapActivity.class);
+                                                        startActivity(i);
+                                                    } else{
+                                                        Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                                    }
+                                                } catch (JSONException ex) { }
+                                            }
+                                        },
+                                        new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+                                                Toast.makeText(MapActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        }) {
+                                    @Override
+                                    public Map<String, String> getHeaders() throws AuthFailureError {
+                                        HashMap<String, String> headers = new HashMap<String, String>();
+                                        headers.put("Content-Type", "application/json; charset=utf-8");
+                                        headers.put("User-agent", System.getProperty("http.agent"));
+                                        return headers;
+                                    }
+                                };
+                                // Access the RequestQueue through your singleton class.
+                                MySingleton.getInstance(getContext()).addToRequestQueue(postRequest);
+                            }
+                        });
+
+                        updateReport.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ttitle.setEnabled(true);
+                                tdescricao.setEnabled(true);
+                                tlocalizacao.setEnabled(true);
+                                gravar_alteracao_show_point_dialog.setVisibility(View.VISIBLE);
+                            }
+                        });
+
+                        gravar_alteracao_show_point_dialog.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String url = "https://intellicity.000webhostapp.com/myslim_commov1920/api/reports/updateReport/" + id_do_report;
+
+                                String tituloUpdated = ttitle.getText().toString();
+                                String descricaoUpdated = tdescricao.getText().toString();
+                                String localizacaoUpdated = tlocalizacao.getText().toString();
+
+                                if(isNullOrEmpty(tituloUpdated)) {
+                                    Toast.makeText(MapActivity.this, "Tem de preencher o título!", Toast.LENGTH_SHORT).show();
+                                }else if(isNullOrEmpty(descricaoUpdated)) {
+                                    Toast.makeText(MapActivity.this, "Tem de preencher a descrição!", Toast.LENGTH_SHORT).show();
+                                }else if(isNullOrEmpty(localizacaoUpdated)) {
+                                    Toast.makeText(MapActivity.this, "Tem de preencher a localização!", Toast.LENGTH_SHORT).show();
+                                }else{
+                                    Map<String, String> jsonParams = new HashMap<String, String>();
+                                    jsonParams.put( "titulo" , tituloUpdated);
+                                    jsonParams.put( "descricao" , descricaoUpdated);
+                                    jsonParams.put( "localizacao" , localizacaoUpdated);
+
+                                    JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+                                            new JSONObject(jsonParams),
+                                            new Response.Listener<JSONObject>() {
+
+                                                @Override
+                                                public void onResponse(JSONObject response) {
+                                                    try {
+                                                        if(response.getBoolean("status")){
+
+                                                            Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                                            Intent i = new Intent(MapActivity.this, MapActivity.class);
+                                                            startActivity(i);
+                                                        } else{
+                                                            Toast.makeText(MapActivity.this, response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    } catch (JSONException ex) { }
+                                                }
+                                            },
+                                            new Response.ErrorListener() {
+                                                @Override
+                                                public void onErrorResponse(VolleyError error) {
+                                                    Toast.makeText(MapActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                                                }
+                                            }) {
+                                        @Override
+                                        public Map<String, String> getHeaders() throws AuthFailureError{
+                                            HashMap<String, String> headers = new HashMap<String, String>();
+                                            headers.put("Content-Type", "application/json; charset=utf-8");
+                                            headers.put("User-agent", System.getProperty("http.agent"));
+                                            return headers;
+                                        }
+                                    };
+                                    // Access the RequestQueue through your singleton class.
+                                    MySingleton.getInstance(getContext()).addToRequestQueue(postRequest);
+                                    ttitle.setEnabled(false);
+                                    tdescricao.setEnabled(false);
+                                    tlocalizacao.setEnabled(false);
+                                    gravar_alteracao_show_point_dialog.setVisibility(View.GONE);
+                                }
+                            }
+                        });
                         dialog.show();
                     }
                     return false;
                 }
             });
         }
+    }
+
+    // validar input de strings
+    public static boolean isNullOrEmpty(String str) {
+        if(str != null && !str.trim().isEmpty())
+            return false;
+        return true;
     }
 
     //pedido a funcionar direito , a ideia é funcionar como uma leyer. Selecionado? mostra todos os reports em markers
@@ -399,24 +545,37 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                     @Override
                     public void onResponse(JSONArray response) {
                         try {
-                            for(int i = 0; i < response.length(); i++){
-                                JSONObject obj = response.getJSONObject(i);
-                                int id = obj.getInt("id");
-                                String nome = obj.getString("nome");
-                                int utilizador_id = obj.getInt("utilizador_id");
-                                String titulo = obj.getString("titulo");
-                                String descricao = obj.getString("descricao");
-                                String data = obj.getString("data");
-                                String localizacao = obj.getString("localizacao");
-                                String fotografia = obj.getString("fotografia");
-                                String latitude = obj.getString("latitude");
-                                String longitude = obj.getString("longitude");
+                            if(others_reports_detalhe_List.size()==0){
+                                for(int i = 0; i < response.length(); i++){
+                                    JSONObject obj = response.getJSONObject(i);
+                                    int id = obj.getInt("id");
+                                    String nome = obj.getString("nome");
+                                    int utilizador_id = obj.getInt("utilizador_id");
+                                    String titulo = obj.getString("titulo");
+                                    String descricao = obj.getString("descricao");
+                                    String data = obj.getString("data");
+                                    String localizacao = obj.getString("localizacao");
+                                    String fotografia = obj.getString("fotografia");
+                                    String latitude = obj.getString("latitude");
+                                    String longitude = obj.getString("longitude");
 
-                                Report report = new Report(id, nome, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
-                                others_reports_detalhe_List.add(report);
+                                    Report report = new Report(id, nome, utilizador_id, titulo, descricao, data, localizacao, fotografia, latitude, longitude);
+                                    others_reports_detalhe_List.add(report);
+                                }
+                                CreateOthersMarkers(others_reports_detalhe_List);
+                            }else{
+                                for (Marker m : markerListOthers) {
+                                    for(Report p : others_reports_detalhe_List){
+                                        if(m.getTitle().equals(p.titulo)){
+                                            m.remove();
+                                        }
+                                    }
+                                }
+                                others_reports_detalhe_List.removeAll(others_reports_detalhe_List);
                             }
+
                             //nextActivity(reports_detalhe_List);
-                            CreateAllMarkers(others_reports_detalhe_List);
+
 
                         } catch (JSONException ex) { }
 
@@ -433,31 +592,31 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
     }
 
     //works very fine welelele e cria dialog para mostrar os dados do marker
-    public void CreateAllMarkers(List<Report> points) {
+    public void CreateOthersMarkers(List<Report> points) {
         Report pontos;
         this.pontos = points;
         for (Report p : points) {
             LatLng latLng = new LatLng(Double.parseDouble(p.getLatitude()), Double.parseDouble(p.getLongitude()));
-            MarkerOptions markerOptions = new MarkerOptions();
+            MarkerOptions markerOptions_others = new MarkerOptions();
 
             // Setting the position for the marker
-            markerOptions.position(latLng);
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            markerOptions_others.position(latLng);
+            markerOptions_others.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 
 
             // Setting the title for the marker.
             // This will be displayed on taping the marker
-            // markerOptions.title(p.getTitulo());
+            markerOptions_others.title(p.getTitulo());
             // Clears the previously touched position
             //map.clear();
 
             // Animating to the touched position
-            //map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
 
             // Placing a marker on the touched position
-            Marker m = mMap.addMarker(markerOptions);
+            Marker m = mMap.addMarker(markerOptions_others);
             m.setTag(p);
-
+            markerListOthers.add(m);
             mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                 @Override
                 public boolean onMarkerClick(Marker marker) {
@@ -465,22 +624,20 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                     if (p != null) {
                         Dialog dialog = new Dialog(getContext());
                         dialog.setCancelable(true);
-                        dialog.setContentView(R.layout.dialog_show_point);
+                        dialog.setContentView(R.layout.dialog_report_info_others);
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-                        TextView ttitle = dialog.findViewById(R.id.title_show_point_dialog);
-                        ttitle.setText("Títulos: " + p.getTitulo());
+                        EditText ttitle = dialog.findViewById(R.id.title_show_point_dialog);
+                        ttitle.setText(p.getTitulo());
 
-                        TextView ttext = dialog.findViewById(R.id.text_show_point_dialog);
-                        ttext.setText("Descrição: " + p.getDescricao());
+                        EditText tdescricao = dialog.findViewById(R.id.text_show_point_dialog);
+                        tdescricao.setText(p.getDescricao());
 
-                        /*TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
-                        Date date = new Date(p.getData());
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YYYY hh:mm");
-                        String dateString = sdf.format(date);
-                        tdata.setText(dateString);*/
+                        EditText tlocalizacao = dialog.findViewById(R.id.localizacao_show_point_dialog);
+                        tlocalizacao.setText(p.getLocalizacao());
 
                         TextView tdata = dialog.findViewById(R.id.data_show_point_dialog);
-                        tdata.setText("Data: " + p.getData());
+                        tdata.setText(p.getData());
 
                         TextView tusername = dialog.findViewById(R.id.username_show_point_dialog);
                         tusername.setText("Reportado por: " + p.getNome());
@@ -494,6 +651,7 @@ GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
                             Picasso.with(getContext()).load(imageError).into(timg);
                         }
                         dialog.show();
+
                     }
                     return false;
                 }
